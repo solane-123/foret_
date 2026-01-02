@@ -1,0 +1,64 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+}
+
+#app {
+  display: flex;
+  height: 100vh;
+}
+
+#sidebar {
+  width: 360px;
+  background: #111;
+  color: white;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+#sidebar h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 2rem;
+}
+
+.filters button {
+  width: 100%;
+  margin-bottom: .5rem;
+  padding: .7rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.filters button.active {
+  background: #e63946;
+  color: white;
+}
+
+.stats, .legend {
+  margin-top: 2rem;
+}
+
+.legend div {
+  display: flex;
+  align-items: center;
+  margin-bottom: .4rem;
+}
+
+.legend span {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin-right: .5rem;
+}
+
+#map {
+  flex: 1;
+}
