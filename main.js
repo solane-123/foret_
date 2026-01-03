@@ -1,208 +1,162 @@
 // --- CONFIGURATION ---
 const config = {
-  colors: {
-    0: '#2c3e50', // Nul (Gris bleu sombre)
-    1: '#2ecc71', // Faible (Vert)
-    2: '#f1c40f', // Moyen (Jaune)
-    3: '#e67e22', // Fort (Orange)
-    4: '#c0392b'  // Très Fort (Rouge sang)
-  },
-  labels: {
-    0: 'Nul', 1: 'Faible', 2: 'Moyen', 3: 'Fort', 4: 'Très Fort'
-  }
+    colors: ['#10b981', '#a3e635', '#facc15', '#fb923c', '#ef4444'], // Vert -> Rouge
+    heightFactor: 400 
 };
 
-// --- INIT CARTE (Dark Mode) ---
-const map = L.map('map', { zoomControl: false }).setView([47.9, 7.35], 10);
+// --- INITIALISATION DE LA CARTE ---
+const map = new maplibregl.Map({
+    container: 'map',
+    style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+    center: [7.35, 47.9], // Haut-Rhin (approximatif pour le départ)
+    zoom: 9,
+    pitch: 50,
+    bearing: -10,
+    antialias: true
+});
 
-// Fond de carte sombre pour faire ressortir le feu (CartoDB DarkMatter)
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution: '© OpenStreetMap, © CartoDB'
-}).addTo(map);
-
-L.control.zoom({ position: 'topright' }).addTo(map);
-
-// Variables globales
-let geoJsonLayer;
-let rawData;
-let myChart;
-
-// --- FONCTIONS ---
-
-function getColor(dn) {
-  return config.colors[dn] || '#ccc';
-}
-
-function style(feature) {
-  return {
-    fillColor: getColor(feature.properties.DN),
-    weight: 0, // Pas de bordure pour alléger
-    opacity: 1,
-    color: 'white',
-    dashArray: '3',
-    fillOpacity: 0.75
-  };
-}
-
-function highlightFeature(e) {
-  const layer = e.target;
-  layer.setStyle({ weight: 2, color: '#fff', fillOpacity: 0.95 });
-  layer.bringToFront();
-}
-
-function resetHighlight(e) {
-  geoJsonLayer.resetStyle(e.target);
-}
-
-// --- CHARGEMENT DES DONNÉES ---
-fetch('data_vegetation.geojson') // Assure-toi que le fichier est à côté du HTML
-  .then(res => res.json())
-  .then(data => {
-    rawData = data;
-    initDashboard(data);
-  })
-  .catch(err => console.error("Erreur chargement:", err));
-
-function initDashboard(data) {
-  // 1. AJOUT CARTE
-  geoJsonLayer = L.geoJSON(data, {
-    style: style,
-    onEachFeature: (feature, layer) => {
-      // Infobulle propre
-      const surfHa = (feature.properties.surf / 10000).toFixed(1); // m² -> Hectares
-      const niv = config.labels[feature.properties.DN];
-      
-      layer.bindPopup(`
-        <div style="font-family:'Inter'">
-          <h4 style="margin:0 0 5px 0; color:${getColor(feature.properties.DN)}">Niveau ${niv}</h4>
-          <b>Surface :</b> ${surfHa} ha<br>
-          <small>ID: ${feature.properties.fid}</small>
-        </div>
-      `);
-      
-      layer.on({
-        mouseover: highlightFeature,
-        mouseout: resetHighlight
-      });
+map.on('load', () => {
+    // 1. Vérification des données
+    if (typeof forestData === 'undefined') {
+        alert("ERREUR : Le fichier data.js n'est pas chargé !");
+        return;
     }
-  }).addTo(map);
 
-  map.fitBounds(geoJsonLayer.getBounds());
+    console.log("Données brutes reçues (Lambert 93)... Conversion en cours...");
 
-  // 2. CALCUL DES STATISTIQUES
-  const stats = calculateStats(data);
-  
-  // 3. MISE À JOUR KPI
-  updateKPI(stats);
+    // 2. CONVERSION MAGIQUE (Lambert 93 -> WGS84)
+    // On définit ce qu'est le Lambert 93 pour le navigateur
+    proj4.defs("EPSG:2154","+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
+    
+    // On convertit les données
+    const convertedData = reproject.toWgs84(forestData, "EPSG:2154", proj4);
+    
+    console.log("Données converties (GPS) :", convertedData);
 
-  // 4. CRÉATION GRAPHIQUE
-  createChart(stats);
+    // 3. LANCEMENT DE L'APP AVEC LES DONNÉES CONVERTIES
+    initApp(convertedData);
 
-  // 5. CRÉATION FILTRES
-  createFilters();
-}
-
-// Calcul agrégé des surfaces par niveau
-function calculateStats(data) {
-  const counts = { 0:0, 1:0, 2:0, 3:0, 4:0 };
-  
-  data.features.forEach(f => {
-    const dn = f.properties.DN;
-    const surf = f.properties.surf || 0;
-    if (counts[dn] !== undefined) {
-      counts[dn] += surf;
+    // 4. AUTO-ZOOM SUR LES DONNÉES
+    const bounds = new maplibregl.LngLatBounds();
+    convertedData.features.forEach(feature => {
+        // Gestion robuste Polygon / MultiPolygon
+        const coords = feature.geometry.type === 'MultiPolygon' 
+            ? feature.geometry.coordinates.flat(1) 
+            : feature.geometry.coordinates;
+            
+        coords.forEach(poly => {
+            poly.forEach(coord => {
+                bounds.extend(coord);
+            });
+        });
+    });
+    
+    if (!bounds.isEmpty()) {
+        map.fitBounds(bounds, { padding: 50, pitch: 45 });
     }
-  });
+});
 
-  // Conversion en Hectares
-  for (let key in counts) {
-    counts[key] = (counts[key] / 10000).toFixed(0); 
-  }
-  return counts;
-}
+function initApp(data) {
+    // Ajout de la source
+    map.addSource('foret', { type: 'geojson', data: data });
 
-function updateKPI(stats) {
-  // Surface Risque Fort (3) + Très Fort (4)
-  const highRiskSurf = parseInt(stats[3]) + parseInt(stats[4]);
-  document.getElementById('kpi-surface').innerText = highRiskSurf.toLocaleString() + ' ha';
-  
-  // Nombre de zones très fortes (juste un comptage simple des polygones)
-  const criticalZones = rawData.features.filter(f => f.properties.DN === 4).length;
-  document.getElementById('kpi-count').innerText = criticalZones;
-}
-
-function createChart(stats) {
-  const ctx = document.getElementById('riskChart').getContext('2d');
-  
-  myChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: Object.values(config.labels),
-      datasets: [{
-        data: Object.values(stats),
-        backgroundColor: Object.values(config.colors),
-        borderWidth: 0,
-        hoverOffset: 10
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }, // On cache la légende par défaut du chart
-        tooltip: {
-          callbacks: {
-            label: (ctx) => ` ${ctx.raw} ha`
-          }
+    // Ajout de la couche 3D
+    map.addLayer({
+        'id': 'foret-3d',
+        'type': 'fill-extrusion',
+        'source': 'foret',
+        'paint': {
+            // Couleur basée sur la colonne "DN" (0 à 4)
+            'fill-extrusion-color': [
+                'interpolate', ['linear'], ['get', 'DN'],
+                0, config.colors[0],
+                1, config.colors[1],
+                2, config.colors[2],
+                3, config.colors[3],
+                4, config.colors[4]
+            ],
+            // Hauteur basée sur DN
+            'fill-extrusion-height': [
+                'interpolate', ['linear'], ['get', 'DN'],
+                0, 50,    // Niveau 0 : 50m de haut
+                4, 3000   // Niveau 4 : 3000m de haut (très visible)
+            ],
+            'fill-extrusion-base': 0,
+            'fill-extrusion-opacity': 0.9
         }
-      },
-      onClick: (evt, elements) => {
-        if (elements.length > 0) {
-          const index = elements[0].index;
-          filterMap(index); // Interaction Chart -> Map
-        } else {
-          filterMap('all');
+    });
+
+    // Interaction (Popups)
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+
+    map.on('mousemove', 'foret-3d', (e) => {
+        map.getCanvas().style.cursor = 'pointer';
+        const props = e.features[0].properties;
+        // La colonne s'appelle "surf", on la divise par 10000 pour avoir des hectares
+        const surfHa = (props.surf / 10000).toFixed(1);
+        
+        popup.setLngLat(e.lngLat)
+            .setHTML(`
+                <div style="color:#333; font-family:'Outfit'; padding:5px;">
+                    <strong style="font-size:1.1em; color:${config.colors[props.DN]}">Niveau ${props.DN}</strong><br>
+                    Surface: ${surfHa} ha
+                </div>
+            `)
+            .addTo(map);
+    });
+
+    map.on('mouseleave', 'foret-3d', () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+    });
+
+    // Calculs pour les graphiques
+    processData(data);
+}
+
+function processData(data) {
+    let totalSurf = 0;
+    let highRiskZones = 0;
+    let distribution = [0, 0, 0, 0, 0];
+
+    data.features.forEach(f => {
+        const dn = f.properties.DN;
+        const surf = f.properties.surf; // Utilisation de la colonne 'surf'
+        
+        if(dn >= 3) { totalSurf += surf; highRiskZones++; }
+        if(distribution[dn] !== undefined) { distribution[dn] += surf; }
+    });
+
+    document.getElementById('kpi-surf').innerText = (totalSurf / 10000).toFixed(0).toLocaleString();
+    document.getElementById('kpi-zones').innerText = highRiskZones;
+    createChart(distribution);
+}
+
+function createChart(data) {
+    const total = data.reduce((a, b) => a + b, 0);
+    const percentages = data.map(d => ((d / total) * 100).toFixed(1));
+
+    const ctx = document.getElementById('riskChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut', // Changé en Doughnut pour le style
+        data: {
+            labels: ['Nul', 'Faible', 'Moyen', 'Fort', 'T.Fort'],
+            datasets: [{
+                data: percentages,
+                backgroundColor: config.colors,
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+                legend: { display: false },
+                tooltip: { 
+                    callbacks: { label: (c) => ` ${c.raw}% des surfaces` } 
+                }
+            }
         }
-      }
-    }
-  });
+    });
 }
-
-function createFilters() {
-  const container = document.getElementById('filter-container');
-  
-  // Bouton "Tous"
-  container.innerHTML = `<button class="filter-btn active" onclick="filterMap('all')">Tous</button>`;
-
-  // Boutons par niveau
-  Object.keys(config.labels).forEach(key => {
-    const label = config.labels[key];
-    const color = config.colors[key];
-    container.innerHTML += `
-      <button class="filter-btn" onclick="filterMap(${key})" id="btn-${key}">
-        <span class="dot" style="background:${color}"></span> ${label}
-      </button>
-    `;
-  });
-}
-
-// Logique de filtrage (Synchronisée)
-window.filterMap = function(level) {
-  // 1. Update Map
-  geoJsonLayer.eachLayer(layer => {
-    const dn = layer.feature.properties.DN;
-    if (level === 'all' || dn == level) {
-      layer.setStyle({ opacity: 1, fillOpacity: 0.75 });
-    } else {
-      layer.setStyle({ opacity: 0, fillOpacity: 0 }); // Masquer
-    }
-  });
-
-  // 2. Update UI Buttons
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  if (level === 'all') {
-    document.querySelector('.filter-btn').classList.add('active');
-  } else {
-    document.getElementById(`btn-${level}`).classList.add('active');
-  }
-};

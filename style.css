@@ -1,64 +1,94 @@
-html, body {
-  margin: 0;
-  height: 100%;
-  font-family: 'Inter', sans-serif;
+:root {
+    --primary: #10b981; /* Vert Émeraude */
+    --dark-bg: #022c22; /* Vert très sombre */
+    --glass: rgba(6, 78, 59, 0.65); /* Verre teinté vert */
+    --text: #ecfdf5;
+    --danger: #ef4444;
+    --font-main: 'Outfit', sans-serif;
 }
 
-#app {
-  display: flex;
-  height: 100vh;
+body { margin: 0; padding: 0; font-family: var(--font-main); background: #000; overflow: hidden; color: var(--text); }
+
+#app { display: flex; height: 100vh; width: 100vw; position: relative; }
+
+/* --- CARTE --- */
+#map { flex: 1; z-index: 0; }
+
+/* --- SIDEBAR GLASSMORPHISM --- */
+.glass-panel {
+    position: absolute;
+    top: 20px; left: 20px; bottom: 20px;
+    width: 380px;
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    overflow-y: auto;
 }
 
-#sidebar {
-  width: 360px;
-  background: #111;
-  color: white;
-  padding: 2rem;
-  box-sizing: border-box;
+/* HEADER */
+.header { display: flex; align-items: center; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
+.logo-box { 
+    width: 50px; height: 50px; 
+    background: linear-gradient(135deg, #34d399, #059669);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; color: #fff;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+}
+h1 { margin: 0; font-size: 1.8rem; font-weight: 700; letter-spacing: -1px; }
+.header p { margin: 0; opacity: 0.6; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; }
+
+/* KPI GRID */
+.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.kpi-card {
+    background: rgba(0,0,0,0.2);
+    padding: 15px; border-radius: 16px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: transform 0.3s;
+}
+.kpi-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.05); }
+
+.kpi-card .label { display: block; font-size: 0.75rem; opacity: 0.7; margin-bottom: 5px; }
+.kpi-card .value { display: block; font-size: 1.8rem; font-weight: 700; color: var(--primary); }
+.kpi-card.warning .value { color: #f87171; }
+.kpi-card .unit { font-size: 0.7rem; opacity: 0.5; }
+
+/* TEXTE */
+.description h3 { color: var(--primary); font-size: 1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;}
+.description p { font-size: 0.9rem; line-height: 1.6; color: #d1fae5; margin: 0 0 10px 0; }
+
+/* CHART */
+.chart-container {
+    background: rgba(0,0,0,0.3);
+    border-radius: 16px;
+    padding: 15px;
+    height: 220px;
+    border: 1px solid rgba(255,255,255,0.05);
 }
 
-#sidebar h1 {
-  margin: 0;
-  font-size: 1.6rem;
+/* LEGENDE 3D */
+.legend-3d { margin-top: auto; }
+.gradient-bar {
+    height: 8px; width: 100%; border-radius: 4px;
+    background: linear-gradient(to right, #2ecc71, #f1c40f, #e67e22, #c0392b);
+    margin-bottom: 8px;
 }
+.legend-labels { display: flex; justify-content: space-between; font-size: 0.7rem; opacity: 0.8; font-weight: 600; }
 
-.subtitle {
-  font-size: 0.9rem;
-  opacity: 0.8;
-  margin-bottom: 2rem;
-}
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
 
-.filters button {
-  width: 100%;
-  margin-bottom: .5rem;
-  padding: .7rem;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.filters button.active {
-  background: #e63946;
-  color: white;
-}
-
-.stats, .legend {
-  margin-top: 2rem;
-}
-
-.legend div {
-  display: flex;
-  align-items: center;
-  margin-bottom: .4rem;
-}
-
-.legend span {
-  width: 16px;
-  height: 16px;
-  display: inline-block;
-  margin-right: .5rem;
-}
-
-#map {
-  flex: 1;
+@media (max-width: 768px) {
+    .glass-panel { width: auto; left: 10px; right: 10px; bottom: auto; height: 40vh; }
+    #map { height: 100vh; }
 }

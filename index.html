@@ -10,10 +10,14 @@
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reproject/1.2.6/reproject.min.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link rel="stylesheet" href="style.css">
+
+    <script src="data.js"></script>
 </head>
 <body>
 
@@ -21,9 +25,7 @@
         
         <aside class="glass-panel sidebar">
             <div class="header">
-                <div class="logo-box">
-                    <i class="fa-solid fa-tree"></i>
-                </div>
+                <div class="logo-box"><i class="fa-solid fa-tree"></i></div>
                 <div>
                     <h1>Forest Guard</h1>
                     <p>Haut-Rhin Analysis</p>
@@ -37,7 +39,7 @@
                     <span class="unit">Hectares</span>
                 </div>
                 <div class="kpi-card warning">
-                    <span class="label">Zones Rouges</span>
+                    <span class="label">Zones Critiques</span>
                     <span class="value" id="kpi-zones">--</span>
                     <span class="unit">Polygones</span>
                 </div>
@@ -45,8 +47,8 @@
 
             <div class="description">
                 <h3><i class="fa-solid fa-circle-info"></i> Analyse</h3>
-                <p>Visualisation 3D de la sensibilité de la végétation aux incendies. La hauteur des blocs correspond à l'intensité du risque.</p>
-                <p><em>Utilisez le clic-droit pour incliner la caméra en 3D.</em></p>
+                <p>Données DataGrandEst converties à la volée (Lambert93 -> GPS).</p>
+                <p><em>Clic-droit pour incliner la caméra.</em></p>
             </div>
 
             <div class="chart-container">
@@ -56,10 +58,7 @@
             <div class="legend-3d">
                 <div class="gradient-bar"></div>
                 <div class="legend-labels">
-                    <span>Faible</span>
-                    <span>Modéré</span>
-                    <span>Fort</span>
-                    <span>Critique</span>
+                    <span>Faible</span><span>Moyen</span><span>Fort</span><span>Critique</span>
                 </div>
             </div>
         </aside>
