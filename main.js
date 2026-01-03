@@ -1,14 +1,14 @@
 // --- CONFIGURATION ---
 const config = {
-    colors: ['#10b981', '#a3e635', '#facc15', '#fb923c', '#ef4444'], // Vert -> Rouge
+    colors: ['#10b981', '#a3e635', '#facc15', '#fb923c', '#ef4444'], 
     heightFactor: 400 
 };
 
-// --- INITIALISATION DE LA CARTE ---
+// --- INIT CARTE ---
 const map = new maplibregl.Map({
     container: 'map',
     style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-    center: [7.35, 47.9], // Haut-Rhin (approximatif pour le départ)
+    center: [7.35, 47.9], // Centré sur le Haut-Rhin
     zoom: 9,
     pitch: 50,
     bearing: -10,
@@ -16,57 +16,26 @@ const map = new maplibregl.Map({
 });
 
 map.on('load', () => {
-    // 1. Vérification des données
+    // 1. Vérifie que data.js est bien chargé
     if (typeof forestData === 'undefined') {
-        alert("ERREUR : Le fichier data.js n'est pas chargé !");
+        alert("ERREUR : Le fichier data.js n'est pas trouvé !\n\nVérifie que tu as bien créé le fichier 'data.js' en ajoutant 'const forestData = ' au début.");
         return;
     }
 
-    console.log("Données brutes reçues (Lambert 93)... Conversion en cours...");
+    console.log("Données chargées :", forestData);
 
-    // 2. CONVERSION MAGIQUE (Lambert 93 -> WGS84)
-    // On définit ce qu'est le Lambert 93 pour le navigateur
-    proj4.defs("EPSG:2154","+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
-    
-    // On convertit les données
-    const convertedData = reproject.toWgs84(forestData, "EPSG:2154", proj4);
-    
-    console.log("Données converties (GPS) :", convertedData);
-
-    // 3. LANCEMENT DE L'APP AVEC LES DONNÉES CONVERTIES
-    initApp(convertedData);
-
-    // 4. AUTO-ZOOM SUR LES DONNÉES
-    const bounds = new maplibregl.LngLatBounds();
-    convertedData.features.forEach(feature => {
-        // Gestion robuste Polygon / MultiPolygon
-        const coords = feature.geometry.type === 'MultiPolygon' 
-            ? feature.geometry.coordinates.flat(1) 
-            : feature.geometry.coordinates;
-            
-        coords.forEach(poly => {
-            poly.forEach(coord => {
-                bounds.extend(coord);
-            });
-        });
+    // 2. Ajout de la source de données
+    map.addSource('foret', {
+        type: 'geojson',
+        data: forestData
     });
-    
-    if (!bounds.isEmpty()) {
-        map.fitBounds(bounds, { padding: 50, pitch: 45 });
-    }
-});
 
-function initApp(data) {
-    // Ajout de la source
-    map.addSource('foret', { type: 'geojson', data: data });
-
-    // Ajout de la couche 3D
+    // 3. Ajout de la couche 3D
     map.addLayer({
         'id': 'foret-3d',
         'type': 'fill-extrusion',
         'source': 'foret',
         'paint': {
-            // Couleur basée sur la colonne "DN" (0 à 4)
             'fill-extrusion-color': [
                 'interpolate', ['linear'], ['get', 'DN'],
                 0, config.colors[0],
@@ -75,30 +44,46 @@ function initApp(data) {
                 3, config.colors[3],
                 4, config.colors[4]
             ],
-            // Hauteur basée sur DN
             'fill-extrusion-height': [
                 'interpolate', ['linear'], ['get', 'DN'],
-                0, 50,    // Niveau 0 : 50m de haut
-                4, 3000   // Niveau 4 : 3000m de haut (très visible)
+                0, 20,    // Niveau 0 : bas
+                4, 3000   // Niveau 4 : très haut
             ],
             'fill-extrusion-base': 0,
             'fill-extrusion-opacity': 0.9
         }
     });
 
-    // Interaction (Popups)
+    // 4. Zoom automatique sur les données
+    const bounds = new maplibregl.LngLatBounds();
+    forestData.features.forEach(feature => {
+        // Gère les polygones simples et multiples
+        const geometry = feature.geometry;
+        if (geometry.type === 'Polygon') {
+            geometry.coordinates[0].forEach(coord => bounds.extend(coord));
+        } else if (geometry.type === 'MultiPolygon') {
+            geometry.coordinates.forEach(poly => {
+                poly[0].forEach(coord => bounds.extend(coord));
+            });
+        }
+    });
+    
+    if (!bounds.isEmpty()) {
+        map.fitBounds(bounds, { padding: 50, pitch: 45 });
+    }
+
+    // 5. Interaction (Popup au survol)
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 
     map.on('mousemove', 'foret-3d', (e) => {
         map.getCanvas().style.cursor = 'pointer';
         const props = e.features[0].properties;
-        // La colonne s'appelle "surf", on la divise par 10000 pour avoir des hectares
         const surfHa = (props.surf / 10000).toFixed(1);
         
         popup.setLngLat(e.lngLat)
             .setHTML(`
                 <div style="color:#333; font-family:'Outfit'; padding:5px;">
-                    <strong style="font-size:1.1em; color:${config.colors[props.DN]}">Niveau ${props.DN}</strong><br>
+                    <strong style="font-size:1.1em;">Niveau ${props.DN}</strong><br>
                     Surface: ${surfHa} ha
                 </div>
             `)
@@ -110,9 +95,9 @@ function initApp(data) {
         popup.remove();
     });
 
-    // Calculs pour les graphiques
-    processData(data);
-}
+    // 6. Calculs pour le panneau latéral
+    processData(forestData);
+});
 
 function processData(data) {
     let totalSurf = 0;
@@ -121,10 +106,15 @@ function processData(data) {
 
     data.features.forEach(f => {
         const dn = f.properties.DN;
-        const surf = f.properties.surf; // Utilisation de la colonne 'surf'
+        const surf = f.properties.surf;
         
-        if(dn >= 3) { totalSurf += surf; highRiskZones++; }
-        if(distribution[dn] !== undefined) { distribution[dn] += surf; }
+        if(dn >= 3) { 
+            totalSurf += surf; 
+            highRiskZones++; 
+        }
+        if(distribution[dn] !== undefined) { 
+            distribution[dn] += surf; 
+        }
     });
 
     document.getElementById('kpi-surf').innerText = (totalSurf / 10000).toFixed(0).toLocaleString();
@@ -138,7 +128,7 @@ function createChart(data) {
 
     const ctx = document.getElementById('riskChart').getContext('2d');
     new Chart(ctx, {
-        type: 'doughnut', // Changé en Doughnut pour le style
+        type: 'doughnut',
         data: {
             labels: ['Nul', 'Faible', 'Moyen', 'Fort', 'T.Fort'],
             datasets: [{
@@ -153,9 +143,7 @@ function createChart(data) {
             maintainAspectRatio: false,
             plugins: { 
                 legend: { display: false },
-                tooltip: { 
-                    callbacks: { label: (c) => ` ${c.raw}% des surfaces` } 
-                }
+                tooltip: { callbacks: { label: (c) => ` ${c.raw}%` } }
             }
         }
     });
