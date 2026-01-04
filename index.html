@@ -50,7 +50,16 @@
             <div class="chart-container">
                 <canvas id="riskChart"></canvas>
             </div>
-            
+            <div class="controls-section">
+            <h3><i class="fa-solid fa-layer-group"></i> Couches</h3>
+            <div class="toggle-btn" onclick="toggleLayer('satellite')">
+                <i class="fa-solid fa-earth-europe"></i> Vue Satellite
+            </div>
+
+            <div class="toggle-btn" onclick="toggleLayer('communes')">
+                <i class="fa-solid fa-city"></i> Limites Communes
+            </div>
+        </div>
             <div class="legend-3d">
                 <div class="gradient-bar"></div>
                 <div class="legend-labels">
