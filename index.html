@@ -3,74 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forest Fire Intelligence • Haut-Rhin</title>
+    <title>Forest Guard Pro • Haut-Rhin</title>
     
     <script src='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js'></script>
     <link href='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css' rel='stylesheet' />
     
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
 
     <script src="data.js"></script>
+
+    <style>
+        :root { --primary: #10b981; --bg: #0f172a; --glass: rgba(15, 23, 42, 0.95); --text: #f1f5f9; --font: 'Outfit', sans-serif; }
+        body { margin: 0; font-family: var(--font); background: var(--bg); color: var(--text); overflow: hidden; }
+        #app { display: flex; height: 100vh; width: 100vw; }
+        #map { flex: 1; }
+
+        /* SIDEBAR ROBUSTE */
+        .sidebar {
+            position: absolute; top: 15px; left: 15px; bottom: 15px; width: 380px;
+            background: var(--glass); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; padding: 20px; z-index: 10;
+            display: flex; flex-direction: column; gap: 15px; overflow-y: auto;
+        }
+
+        /* HEADER */
+        .header { display: flex; align-items: center; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+        .logo { width: 45px; height: 45px; background: var(--primary); border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: #fff; }
+        h1 { margin: 0; font-size: 1.4rem; font-weight: 700; }
+        
+        /* KPI & TITRES */
+        .kpi-row { display: flex; gap: 10px; }
+        .kpi { flex: 1; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; text-align: center; }
+        .kpi strong { display: block; font-size: 1.5rem; color: #fff; }
+        .title { font-size: 0.9rem; color: var(--primary); margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* CORRECTION DU BUG D'AFFICHAGE GRAPHIQUE */
+        .chart-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 10px;
+            /* C'est ICI que ça se joue : on force la hauteur */
+            height: 220px; 
+            width: 100%;
+            position: relative;
+        }
+
+        /* BOUTONS */
+        .btn { background: rgba(255,255,255,0.05); padding: 10px; margin-bottom: 5px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+        .btn:hover { background: rgba(255,255,255,0.1); }
+        .btn.active { background: rgba(16, 185, 129, 0.3); border: 1px solid var(--primary); }
+    </style>
 </head>
 <body>
 
-    <div id="app">
-        <aside class="glass-panel sidebar">
-            <div class="header">
-                <div class="logo-box"><i class="fa-solid fa-tree"></i></div>
-                <div>
-                    <h1>Forest Guard</h1>
-                    <p>Haut-Rhin Analysis</p>
-                </div>
-            </div>
-
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <span class="label">Surface Sensible</span>
-                    <span class="value" id="kpi-surf">--</span>
-                    <span class="unit">Hectares</span>
-                </div>
-                <div class="kpi-card warning">
-                    <span class="label">Zones Rouges</span>
-                    <span class="value" id="kpi-zones">--</span>
-                    <span class="unit">Polygones</span>
-                </div>
-            </div>
-
-            <div class="description">
-                <h3><i class="fa-solid fa-circle-info"></i> Analyse</h3>
-                <p>Visualisation 3D de la sensibilité aux feux.</p>
-                <p><em>Clic-droit maintenu pour tourner la vue.</em></p>
-            </div>
-
-            <div class="chart-container">
-                <canvas id="riskChart"></canvas>
-            </div>
-            <div class="controls-section">
-            <h3><i class="fa-solid fa-layer-group"></i> Couches</h3>
-            <div class="toggle-btn" onclick="toggleLayer('satellite')">
-                <i class="fa-solid fa-earth-europe"></i> Vue Satellite
-            </div>
-
-            <div class="toggle-btn" onclick="toggleLayer('communes')">
-                <i class="fa-solid fa-city"></i> Limites Communes
+<div id="app">
+    <aside class="sidebar">
+        <div class="header">
+            <div class="logo"><i class="fa-solid fa-tree"></i></div>
+            <div>
+                <h1>Forest Guard</h1>
+                <p style="margin:0; opacity:0.6; font-size:0.8rem;">Analyse Haut-Rhin</p>
             </div>
         </div>
-            <div class="legend-3d">
-                <div class="gradient-bar"></div>
-                <div class="legend-labels">
-                    <span>Faible</span><span>Moyen</span><span>Fort</span><span>Critique</span>
-                </div>
+
+        <div class="kpi-row">
+            <div class="kpi">
+                <span style="font-size:0.7rem;">Surface (Ha)</span>
+                <strong id="val-surf">--</strong>
             </div>
-        </aside>
+            <div class="kpi">
+                <span style="font-size:0.7rem;">Indice IVM</span>
+                <strong id="val-ivm">--</strong>
+            </div>
+        </div>
 
-        <div id="map"></div>
-    </div>
+        <div>
+            <div class="title">Vulnérabilité (Radar)</div>
+            <div class="chart-box">
+                <canvas id="polarChart"></canvas>
+            </div>
+        </div>
 
-    <script src="main.js"></script>
+        <div>
+            <div class="title">Répartition</div>
+            <div class="chart-box" style="height: 160px;">
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+
+        <div class="title" style="margin-top:10px;">Couches</div>
+        <div class="btn" onclick="toggleLayer('sat')"><i class="fa-solid fa-satellite"></i> Satellite</div>
+        <div class="btn" onclick="toggleLayer('com')"><i class="fa-solid fa-city"></i> Communes</div>
+    </aside>
+
+    <div id="map"></div>
+</div>
+
+<script>
+    // --- CONFIG ---
+    const colors = ['#059669', '#34d399', '#facc15', '#fb923c', '#ef4444'];
+    
+    // --- MAP ---
+    const map = new maplibregl.Map({
+        container: 'map',
+        style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+        center: [7.35, 47.9], zoom: 9, pitch: 50, antialias: true
+    });
+
+    map.on('load', () => {
+        // --- CHARGEMENT COUCHES ---
+        map.addSource('sat', { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256 });
+        map.addLayer({ id: 'sat', type: 'raster', source: 'sat', paint: { 'raster-opacity': 0 } });
+
+        fetch('https://geo.api.gouv.fr/departements/68/communes?geometry=contour&format=geojson&type=commune-actuelle')
+            .then(r => r.json()).then(d => {
+                map.addSource('com', { type: 'geojson', data: d });
+                map.addLayer({ id: 'com', type: 'line', source: 'com', paint: { 'line-color': '#fff', 'line-opacity': 0 }, layout: {'visibility':'none'} });
+            });
+
+        // --- VERIF DATA ---
+        if(typeof forestData !== 'undefined') {
+            map.addSource('foret', { type: 'geojson', data: forestData });
+            map.addLayer({
+                id: 'foret-3d', type: 'fill-extrusion', source: 'foret',
+                paint: {
+                    'fill-extrusion-color': ['interpolate', ['linear'], ['get', 'DN'], 0, colors[0], 4, colors[4]],
+                    'fill-extrusion-height': ['interpolate', ['linear'], ['get', 'DN'], 0, 50, 4, 3000],
+                    'fill-extrusion-opacity': 0.9
+                }
+            });
+            processData(forestData);
+            
+            // Zoom Auto
+            const b = new maplibregl.LngLatBounds();
+            forestData.features.forEach(f => {
+               const c = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] : f.geometry.coordinates.flat(1);
+               c.forEach(p => b.extend(p));
+            });
+            map.fitBounds(b, { padding: 50 });
+        } else {
+            alert("ERREUR: data.js non chargé !");
+        }
+    });
+
+    // --- DATA & CHARTS ---
+    function processData(data) {
+        let dist = [0,0,0,0,0];
+        let total = 0, riskSum = 0, high = 0;
+
+        data.features.forEach(f => {
+            const dn = f.properties.DN;
+            const surf = f.properties.surf;
+            if(dist[dn] !== undefined) dist[dn] += surf;
+            total += surf;
+            riskSum += (surf * dn);
+            if(dn >= 3) high += surf;
+        });
+
+        // KPI
+        document.getElementById('val-surf').innerText = (high/10000).toFixed(0);
+        document.getElementById('val-ivm').innerText = (riskSum/total).toFixed(2) + "/4";
+
+        // GRAPHIQUES
+        initCharts(dist);
+    }
+
+    function initCharts(dataArr) {
+        // Conversion en %
+        const total = dataArr.reduce((a,b)=>a+b,0);
+        const dataPct = dataArr.map(d => ((d/total)*100).toFixed(1));
+
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = 'Outfit';
+
+        // 1. POLAR CHART (Radar)
+        new Chart(document.getElementById('polarChart'), {
+            type: 'polarArea',
+            data: {
+                labels: ['Nul', 'Faible', 'Moyen', 'Fort', 'Critique'],
+                datasets: [{
+                    data: dataPct, // Données réelles
+                    backgroundColor: colors.map(c => c + 'AA'),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { r: { grid: { color: '#334155' }, ticks: { display: false, backdropColor: 'transparent' } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 2. BAR CHART
+        new Chart(document.getElementById('barChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Nul', 'Faible', 'Moyen', 'Fort', 'Critique'],
+                datasets: [{ data: dataPct, backgroundColor: colors, borderRadius: 4 }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { x: { grid: { color: '#334155' } }, y: { grid: { display: false } } }
+            }
+        });
+    }
+
+    // --- INTERACTION ---
+    function toggleLayer(l) {
+        const btn = event.currentTarget;
+        btn.classList.toggle('active');
+        if(l === 'sat') {
+            const o = map.getPaintProperty('sat', 'raster-opacity');
+            map.setPaintProperty('sat', 'raster-opacity', o===1 ? 0 : 1);
+        } else {
+            const v = map.getLayoutProperty('com', 'visibility');
+            map.setLayoutProperty('com', 'visibility', v==='visible'?'none':'visible');
+            map.setPaintProperty('com', 'line-opacity', v==='visible'?0:0.6);
+        }
+    }
+</script>
+
 </body>
 </html>

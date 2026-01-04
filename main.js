@@ -1,6 +1,7 @@
-// --- CONFIGURATION ---
+// --- CONFIGURATION PREMIUM ---
 const config = {
-    colors: ['#10b981', '#a3e635', '#facc15', '#fb923c', '#ef4444'], 
+    colors: ['#059669', '#34d399', '#facc15', '#fb923c', '#ef4444'], 
+    labels: ['Nul', 'Faible', 'Moyen', 'Fort', 'Critique'],
     heightFactor: 400 
 };
 
@@ -8,245 +9,135 @@ const config = {
 const map = new maplibregl.Map({
     container: 'map',
     style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-    center: [7.35, 47.9], // Centré sur le Haut-Rhin
-    zoom: 9,
-    pitch: 50,
-    bearing: -10,
-    antialias: true
+    center: [7.35, 47.9],
+    zoom: 9, pitch: 55, bearing: -15, antialias: true
 });
 
 map.on('load', () => {
-    // 1. Vérifie que data.js est bien chargé
-    if (typeof forestData === 'undefined') {
-        alert("ERREUR : Le fichier data.js n'est pas trouvé !");
-        return;
-    }
+    if (typeof forestData === 'undefined') { alert("ERREUR: Le fichier data.js n'est pas chargé. Vérifie qu'il est bien dans le dossier."); return; }
 
-    // --- NOUVEAU : 2. AJOUT DU FOND SATELLITE (Flux Externe) ---
-    map.addSource('satellite-source', {
-        'type': 'raster',
-        'tiles': ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-        'tileSize': 256
-    });
+    // 1. Satellite
+    map.addSource('satellite-source', { 'type': 'raster', 'tiles': ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], 'tileSize': 256 });
+    map.addLayer({ 'id': 'satellite-layer', 'type': 'raster', 'source': 'satellite-source', 'paint': { 'raster-opacity': 0 }, 'layout': { 'visibility': 'visible' } });
 
-    map.addLayer({
-        'id': 'satellite-layer',
-        'type': 'raster',
-        'source': 'satellite-source',
-        'paint': { 'raster-opacity': 0 }, // Invisible au départ
-        'layout': { 'visibility': 'visible' }
-    });
-
-    // --- NOUVEAU : 3. AJOUT DES COMMUNES (API Géo en direct) ---
+    // 2. Communes (API)
     fetch('https://geo.api.gouv.fr/departements/68/communes?geometry=contour&format=geojson&type=commune-actuelle')
         .then(res => res.json())
-        .then(communesData => {
-            map.addSource('communes-source', { type: 'geojson', data: communesData });
-            
-            // Les lignes des communes
-            map.addLayer({
-                'id': 'communes-lines',
-                'type': 'line',
-                'source': 'communes-source',
-                'layout': { 'visibility': 'none' }, // Invisible au départ
-                'paint': {
-                    'line-color': '#ffffff',
-                    'line-width': 1,
-                    'line-opacity': 0.5,
-                    'line-dasharray': [2, 1]
-                }
-            });
-            
-            // Les noms des communes
-            map.addLayer({
-                'id': 'communes-labels',
-                'type': 'symbol',
-                'source': 'communes-source',
-                'layout': {
-                    'text-field': ['get', 'nom'],
-                    'text-font': ['Open Sans Regular'], // Police par défaut
-                    'text-size': 12,
-                    'visibility': 'none'
-                },
-                'paint': {
-                    'text-color': '#fff',
-                    'text-halo-color': '#000',
-                    'text-halo-width': 2
-                }
-            });
-        })
-        .catch(err => console.error("Erreur chargement communes", err));
+        .then(d => {
+            map.addSource('communes-source', { type: 'geojson', data: d });
+            map.addLayer({ 'id': 'communes-lines', 'type': 'line', 'source': 'communes-source', 'layout': { 'visibility': 'none' }, 'paint': { 'line-color': '#a7f3d0', 'line-width': 0.8, 'line-opacity': 0.6, 'line-dasharray': [3, 2] } });
+            map.addLayer({ 'id': 'communes-labels', 'type': 'symbol', 'source': 'communes-source', 'layout': { 'text-field': ['get', 'nom'], 'text-font': ['Open Sans SemiBold'], 'text-size': 11, 'visibility': 'none', 'text-transform': 'uppercase' }, 'paint': { 'text-color': '#e2e8f0', 'text-halo-color': 'rgba(15, 23, 42, 0.8)', 'text-halo-width': 2 } });
+        });
 
-
-    // --- 4. TA COUCHE FORÊT (Données data.js) ---
-    map.addSource('foret', {
-        type: 'geojson',
-        data: forestData
-    });
-
+    // 3. Forêt 3D
+    map.addSource('foret', { type: 'geojson', data: forestData });
     map.addLayer({
-        'id': 'foret-3d',
-        'type': 'fill-extrusion',
-        'source': 'foret',
+        'id': 'foret-3d', 'type': 'fill-extrusion', 'source': 'foret',
         'paint': {
-            'fill-extrusion-color': [
-                'interpolate', ['linear'], ['get', 'DN'],
-                0, config.colors[0],
-                1, config.colors[1],
-                2, config.colors[2],
-                3, config.colors[3],
-                4, config.colors[4]
-            ],
-            'fill-extrusion-height': [
-                'interpolate', ['linear'], ['get', 'DN'],
-                0, 20,    
-                4, 3000   
-            ],
-            'fill-extrusion-base': 0,
-            'fill-extrusion-opacity': 0.9
+            'fill-extrusion-color': ['interpolate', ['linear'], ['get', 'DN'], 0, config.colors[0], 1, config.colors[1], 2, config.colors[2], 3, config.colors[3], 4, config.colors[4]],
+            'fill-extrusion-height': ['interpolate', ['linear'], ['get', 'DN'], 0, 30, 4, 3500],
+            'fill-extrusion-opacity': 0.95
         }
     });
 
-    // 5. Zoom automatique sur les données
+    // 4. Auto-Zoom
     const bounds = new maplibregl.LngLatBounds();
-    forestData.features.forEach(feature => {
-        const geometry = feature.geometry;
-        if (geometry.type === 'Polygon') {
-            geometry.coordinates[0].forEach(coord => bounds.extend(coord));
-        } else if (geometry.type === 'MultiPolygon') {
-            geometry.coordinates.forEach(poly => {
-                poly[0].forEach(coord => bounds.extend(coord));
-            });
-        }
-    });
-    
-    if (!bounds.isEmpty()) {
-        map.fitBounds(bounds, { padding: 50, pitch: 45 });
-    }
+    forestData.features.forEach(f => { const g = f.geometry; (g.type==='Polygon'?g.coordinates[0]:g.coordinates.flat(1)).forEach(c => bounds.extend(c)); });
+    if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: {top: 50, bottom:50, left: 450, right: 50}, pitch: 55 });
 
-    // 6. Interaction (Popup)
-    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
-
+    // 5. Popup
+    const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, maxWidth: '300px' });
     map.on('mousemove', 'foret-3d', (e) => {
         map.getCanvas().style.cursor = 'pointer';
-        const props = e.features[0].properties;
-        const surfHa = (props.surf / 10000).toFixed(1);
-        
-        popup.setLngLat(e.lngLat)
-            .setHTML(`
-                <div style="color:#333; font-family:'Outfit'; padding:5px;">
-                    <strong style="font-size:1.1em; color:${config.colors[props.DN]}">Niveau ${props.DN}</strong><br>
-                    Surface: ${surfHa} ha
+        const p = e.features[0].properties;
+        const color = config.colors[p.DN];
+        popup.setLngLat(e.lngLat).setHTML(`
+            <div style="font-family:'Outfit';">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+                    <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:${color}; box-shadow: 0 0 10px ${color};"></span>
+                    <strong style="font-size:1.1em; color:#fff;">Niveau ${p.DN}</strong>
                 </div>
-            `)
-            .addTo(map);
+                <div style="color:#94a3b8; font-size:0.9em;">Surface: <span style="color:#fff; font-weight:600;">${(p.surf/10000).toFixed(1)} ha</span></div>
+            </div>
+        `).addTo(map);
     });
+    map.on('mouseleave', 'foret-3d', () => { map.getCanvas().style.cursor = ''; popup.remove(); });
 
-    map.on('mouseleave', 'foret-3d', () => {
-        map.getCanvas().style.cursor = '';
-        popup.remove();
-    });
-
-    // 7. Calculs Indicateurs
     processData(forestData);
 });
 
-// --- FONCTIONS EXISTANTES (Indicateurs & Graphiques) ---
 function processData(data) {
-    let totalSurf = 0;
-    let weightedRiskSum = 0; 
-    let highRiskSurf = 0;
-    let distribution = [0, 0, 0, 0, 0];
-
+    let total=0, weighted=0, high=0, dist=[0,0,0,0,0];
     data.features.forEach(f => {
-        const dn = f.properties.DN;
-        const surf = f.properties.surf; 
-        
-        totalSurf += surf;
-        weightedRiskSum += (surf * dn); 
-        
-        if(dn >= 3) { highRiskSurf += surf; }
-        if(distribution[dn] !== undefined) { distribution[dn] += surf; }
+        const s = f.properties.surf, d = f.properties.DN;
+        total+=s; weighted+=(s*d);
+        if(d>=3) high+=s;
+        if(dist[d]!==undefined) dist[d]+=s;
     });
 
-    document.getElementById('kpi-surf').innerText = (highRiskSurf / 10000).toFixed(0).toLocaleString();
-    
-    const ivm = (weightedRiskSum / totalSurf).toFixed(2);
-    const kpiZonesLabel = document.querySelector('.kpi-card.warning .label');
-    const kpiZonesValue = document.getElementById('kpi-zones');
-    const kpiZonesUnit = document.querySelector('.kpi-card.warning .unit');
+    // Mise à jour KPIs
+    document.getElementById('kpi-surf').innerText = (high/10000).toFixed(0).toLocaleString();
+    const ivm = (weighted/total).toFixed(2);
+    const kpiVal = document.getElementById('kpi-zones');
+    kpiVal.innerText = ivm + "/4";
+    kpiVal.style.color = ivm<1.5 ? config.colors[1] : (ivm<2.5 ? config.colors[2] : config.colors[4]);
 
-    kpiZonesLabel.innerText = "Indice Global (IVM)";
-    kpiZonesValue.innerText = ivm + "/4";
-    kpiZonesUnit.innerText = "Vulnérabilité Moyenne";
-
-    if(ivm < 1.5) kpiZonesValue.style.color = "#a3e635"; 
-    else if(ivm < 2.5) kpiZonesValue.style.color = "#facc15"; 
-    else kpiZonesValue.style.color = "#ef4444"; 
-
-    createChart(distribution, ivm);
+    // Appel des 2 graphiques
+    createBarChart(dist);
+    createPolarChart(dist);
 }
 
-function createChart(data, ivm) {
-    const total = data.reduce((a, b) => a + b, 0);
-    const percentages = data.map(d => ((d / total) * 100).toFixed(1));
-
+function createBarChart(data) {
+    const total = data.reduce((a,b)=>a+b,0); const perc = data.map(d=>((d/total)*100).toFixed(1));
     const ctx = document.getElementById('riskChart').getContext('2d');
-    if(window.myRiskChart) window.myRiskChart.destroy();
-
-    window.myRiskChart = new Chart(ctx, {
+    if(window.barChart) window.barChart.destroy();
+    
+    Chart.defaults.font.family = 'Outfit';
+    window.barChart = new Chart(ctx, {
         type: 'bar',
-        data: {
-            labels: ['Nul (0)', 'Faible (1)', 'Moyen (2)', 'Fort (3)', 'Critique (4)'],
-            datasets: [{
-                label: 'Part du territoire (%)',
-                data: percentages,
-                backgroundColor: config.colors,
-                borderRadius: 4,
-                borderWidth: 0,
-                barPercentage: 0.6
-            }]
-        },
+        data: { labels: config.labels, datasets: [{ data: perc, backgroundColor: config.colors, borderRadius: 6, barPercentage: 0.7 }] },
         options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { 
-                legend: { display: false },
-                tooltip: { callbacks: { label: (c) => ` ${c.raw}% du territoire` } }
-            },
-            scales: {
-                x: { 
-                    grid: { color: 'rgba(255,255,255,0.05)' },
-                    ticks: { color: 'rgba(255,255,255,0.5)', callback: (v) => v + '%' }
-                },
-                y: { 
-                    grid: { display: false },
-                    ticks: { color: '#fff', font: {family: 'Outfit'} } 
-                }
-            }
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: { legend: {display:false}, tooltip: {backgroundColor: '#0f172a', titleColor: '#fff', bodyColor: '#e2e8f0', callbacks: {label:c=>` ${c.raw}%`}}},
+            scales: { x: { grid: {color: 'rgba(255,255,255,0.05)'}, ticks: {color:'#94a3b8', callback:v=>v+'%'} }, y: { grid: {display:false}, ticks: {color: '#e2e8f0'} } }
         }
     });
 }
 
-// --- NOUVEAU : FONCTION POUR LES BOUTONS ---
-// Cette fonction est en dehors de map.on('load') pour être accessible par le HTML
-window.toggleLayer = function(layerName) {
-    // Gestion du bouton actif (visuel)
-    const btn = event.currentTarget;
-    btn.classList.toggle('active');
+function createPolarChart(data) {
+    // Conversion des données en pourcentages
+    const total = data.reduce((a,b)=>a+b,0); 
+    const perc = data.map(d=>((d/total)*100).toFixed(1));
+    
+    const ctx = document.getElementById('polarChart').getContext('2d');
+    if(window.polarChart) window.polarChart.destroy();
+    
+    window.polarChart = new Chart(ctx, {
+        type: 'polarArea',
+        data: {
+            labels: config.labels,
+            datasets: [{
+                data: perc,
+                backgroundColor: config.colors.map(c => c + 'AA'), // Transparence
+                borderColor: config.colors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: {display:false}, tooltip: {backgroundColor: '#0f172a', bodyColor: '#fff'} },
+            scales: { r: { grid: {color: 'rgba(255,255,255,0.1)'}, ticks: {display: false, backdropColor: 'transparent'}, pointLabels: {color: '#e2e8f0', font:{size:11}} } }
+        }
+    });
+}
 
-    if (layerName === 'satellite') {
-        const currentOpacity = map.getPaintProperty('satellite-layer', 'raster-opacity');
-        // Si c'est 1 (visible), on passe à 0 (invisible), et inversement
-        const targetOpacity = currentOpacity === 1 ? 0 : 1;
-        map.setPaintProperty('satellite-layer', 'raster-opacity', targetOpacity);
-    } 
-    else if (layerName === 'communes') {
-        const visibility = map.getLayoutProperty('communes-lines', 'visibility');
-        const nextState = (visibility === 'visible') ? 'none' : 'visible';
-        
-        map.setLayoutProperty('communes-lines', 'visibility', nextState);
-        map.setLayoutProperty('communes-labels', 'visibility', nextState);
+window.toggleLayer = function(n) {
+    event.currentTarget.classList.toggle('active');
+    if(n==='satellite') {
+        const op = map.getPaintProperty('satellite-layer', 'raster-opacity');
+        map.setPaintProperty('satellite-layer', 'raster-opacity', op===1?0:1);
+    } else {
+        const v = map.getLayoutProperty('communes-lines','visibility')==='visible'?'none':'visible';
+        map.setLayoutProperty('communes-lines','visibility',v); map.setLayoutProperty('communes-labels','visibility',v);
     }
 };
