@@ -3,59 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forest Guard Pro • Debug Mode</title>
+    <title>Forest Guard • Light Mode</title>
     
     <script src='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js'></script>
     <link href='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css' rel='stylesheet' />
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script src="data.js"></script>
 
     <style>
-        :root { --primary: #10b981; --bg: #0f172a; --glass: rgba(15, 23, 42, 0.95); --text: #f1f5f9; --font: 'Outfit', sans-serif; }
-        body { margin: 0; font-family: var(--font); background: var(--bg); color: var(--text); overflow: hidden; }
-        #app { display: flex; height: 100vh; width: 100vw; }
-        #map { flex: 1; }
-
-        /* SIDEBAR */
-        .sidebar {
-            position: absolute; top: 15px; left: 15px; bottom: 15px; width: 380px;
-            background: var(--glass); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px; padding: 20px; z-index: 10;
-            display: flex; flex-direction: column; gap: 15px; overflow-y: auto;
+        /* --- THÈME CLAIR ÉPURÉ --- */
+        :root {
+            --primary: #059669; /* Vert émeraude professionnel */
+            --bg-main: #f0f2f5; /* Gris très clair pour le fond */
+            --glass-white: rgba(255, 255, 255, 0.95); /* Fond des panneaux */
+            --border-light: rgba(0, 0, 0, 0.08); /* Bordures subtiles */
+            --text-dark: #1e293b; /* Texte principal gris foncé */
+            --text-muted: #64748b; /* Texte secondaire */
+            --font: 'Outfit', sans-serif;
+            --shadow-soft: 0 4px 20px rgba(0,0,0,0.06); /* Ombre douce */
         }
 
-        .header { display: flex; align-items: center; gap: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .logo { width: 45px; height: 45px; background: var(--primary); border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: #fff; }
-        h1 { margin: 0; font-size: 1.4rem; font-weight: 700; }
+        body { margin: 0; font-family: var(--font); background: var(--bg-main); color: var(--text-dark); overflow: hidden; }
+        #app { display: flex; height: 100vh; width: 100vw; }
+        #map { flex: 1; z-index: 0; }
 
-        .kpi-row { display: flex; gap: 10px; }
-        .kpi { flex: 1; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; text-align: center; }
-        .kpi strong { display: block; font-size: 1.5rem; color: #fff; }
-        .title { font-size: 0.9rem; color: var(--primary); margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        /* SIDEBAR BLANCHE */
+        .sidebar {
+            position: absolute; top: 20px; left: 20px; bottom: 20px; width: 360px;
+            background: var(--glass-white);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid #fff;
+            border-radius: 20px; 
+            padding: 25px; 
+            z-index: 10;
+            display: flex; flex-direction: column; gap: 20px; overflow-y: auto;
+            box-shadow: var(--shadow-soft);
+            scrollbar-width: none; 
+        }
+        .sidebar::-webkit-scrollbar { display: none; }
 
-        /* --- CORRECTION CRITIQUE : HAUTEUR FORCÉE --- */
+        /* HEADER */
+        .header { display: flex; align-items: center; gap: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-light); }
+        .logo { 
+            width: 44px; height: 44px; 
+            background: var(--primary); 
+            border-radius: 12px; display: flex; justify-content: center; align-items: center; 
+            font-size: 1.3rem; color: #fff; box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3);
+        }
+        h1 { margin: 0; font-size: 1.4rem; font-weight: 700; color: var(--text-dark); }
+        .subtitle { margin: 0; font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+
+        /* KPI CARDS */
+        .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .kpi { 
+            background: #fff; 
+            padding: 15px; border-radius: 16px; text-align: center; 
+            border: 1px solid var(--border-light);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .kpi-val { display: block; font-size: 1.6rem; font-weight: 700; color: var(--text-dark); margin-top: 5px; }
+        .kpi-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+
+        /* TITRES */
+        .section-title { 
+            font-size: 0.85rem; color: var(--text-dark); margin-bottom: 12px; 
+            font-weight: 700; display: flex; align-items: center; gap: 8px;
+        }
+        .section-title i { color: var(--primary); }
+
+        /* CONTAINERS GRAPHIQUES (Fond blanc) */
         .chart-box {
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            padding: 10px;
+            background: #fff;
+            border-radius: 16px;
+            padding: 15px;
             width: 100%;
             position: relative;
+            border: 1px solid var(--border-light);
         }
-        /* On force la hauteur pour le Polaire */
-        #polar-container { height: 250px; min-height: 250px; }
-        /* On force la hauteur pour les Barres */
-        #bar-container { height: 180px; min-height: 180px; }
+        /* Hauteurs forcées pour éviter les bugs */
+        #polar-container { height: 240px; min-height: 240px; display: flex; justify-content: center; }
+        #bar-container { height: 160px; min-height: 160px; }
 
-        .btn { background: rgba(255,255,255,0.05); padding: 10px; margin-bottom: 5px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
-        .btn:hover { background: rgba(255,255,255,0.1); }
-        .btn.active { background: rgba(16, 185, 129, 0.3); border: 1px solid var(--primary); }
-        
-        .maplibregl-popup-content { background: #0f172a !important; color: #fff !important; font-family: 'Outfit'; padding: 10px; border: 1px solid #334155; }
+        /* BOUTONS CLAIRS */
+        .toggle-btn { 
+            background: #fff;
+            padding: 12px 16px; border-radius: 12px; 
+            cursor: pointer; display: flex; align-items: center; gap: 10px; 
+            font-size: 0.9rem; color: var(--text-muted); border: 1px solid var(--border-light);
+            transition: all 0.2s; margin-bottom: 8px; font-weight: 500;
+        }
+        .toggle-btn:hover { background: #f8fafc; color: var(--text-dark); border-color: #cbd5e1; }
+        .toggle-btn.active { 
+            background: #ecfdf5; /* Vert très clair */
+            border-color: var(--primary); 
+            color: var(--primary); 
+            font-weight: 600;
+        }
+        .toggle-btn.active i { color: var(--primary); }
+
+        /* POPUP CLAIRE */
+        .maplibregl-popup-content { 
+            background: #fff !important; 
+            color: var(--text-dark) !important; 
+            font-family: var(--font); padding: 15px !important; 
+            border-radius: 12px !important;
+            box-shadow: var(--shadow-soft) !important;
+            border: 1px solid var(--border-light);
+        }
+        .maplibregl-popup-tip { border-top-color: #fff !important; }
+
+        .filter-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
+        .filter-btn {
+          padding: 8px 5px; border-radius: 8px;
+          font-size: 0.75rem; font-weight: 600; text-align: center;
+          cursor: pointer; border: 1px solid transparent;
+          background: #f1f5f9; color: #94a3b8; /* Gris par défaut (désactivé) */
+          transition: all 0.2s;
+}
+/* Quand le bouton est actif, il prend la couleur définie en ligne */
+        .filter-btn.active {
+          background: var(--btn-color); 
+          color: #fff;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
     </style>
 </head>
 <body>
@@ -66,102 +140,127 @@
             <div class="logo"><i class="fa-solid fa-tree"></i></div>
             <div>
                 <h1>Forest Guard</h1>
-                <p style="margin:0; opacity:0.6; font-size:0.8rem;">Analyse Haut-Rhin</p>
+                <p class="subtitle">Analyse Territoriale • Haut-Rhin</p>
             </div>
         </div>
 
         <div class="kpi-row">
             <div class="kpi">
-                <span style="font-size:0.7rem;">Surface (Ha)</span>
-                <strong id="val-surf">--</strong>
+                <span class="kpi-label">Surface Sensible (Ha)</span>
+                <strong class="kpi-val" id="val-surf">--</strong>
             </div>
             <div class="kpi">
-                <span style="font-size:0.7rem;">Indice IVM</span>
-                <strong id="val-ivm">--</strong>
+                <span class="kpi-label">Indice Moyen (IVM)</span>
+                <strong class="kpi-val" id="val-ivm">--</strong>
             </div>
         </div>
 
         <div>
-            <div class="title">Vulnérabilité</div>
+            <div class="section-title"><i class="fa-solid fa-chart-pie"></i> Vulnérabilité (Radar)</div>
             <div class="chart-box" id="polar-container">
                 <canvas id="polarChart"></canvas>
             </div>
         </div>
 
         <div>
-            <div class="title">Répartition</div>
+            <div class="section-title"><i class="fa-solid fa-chart-bar"></i> Répartition par Niveau</div>
             <div class="chart-box" id="bar-container">
                 <canvas id="barChart"></canvas>
             </div>
         </div>
-
-        <div class="title" style="margin-top:10px;">Couches</div>
-        <div class="btn" onclick="toggleLayer('sat')"><i class="fa-solid fa-satellite"></i> Satellite</div>
-        <div class="btn" onclick="toggleLayer('com')"><i class="fa-solid fa-city"></i> Communes</div>
+        <div>
+            <div class="section-title"><i class="fa-solid fa-filter"></i> Filtres de Risque</div>
+            <div class="filter-grid" id="filter-container">
+            </div>
+         </div>
+        <div style="margin-top: auto;">
+            <div class="section-title"><i class="fa-solid fa-layer-group"></i> Calques</div>
+            <div class="toggle-btn" onclick="toggleLayer('sat')">
+                <i class="fa-solid fa-earth-europe"></i> Vue Satellite
+            </div>
+            <div class="toggle-btn" onclick="toggleLayer('com')">
+                <i class="fa-solid fa-vector-square"></i> Limites Communales
+            </div>
+        </div>
     </aside>
 
     <div id="map"></div>
 </div>
 
 <script>
-    // 1. CONFIG
-    const colors = ['#059669', '#34d399', '#facc15', '#fb923c', '#ef4444'];
+    // 1. CONFIG COULEURS (Palette standard mais propre)
+    const config = {
+        colors: ['#059669', '#34d399', '#facc15', '#fb923c', '#ef4444'], 
+        labels: ['Nul', 'Faible', 'Moyen', 'Fort', 'Critique']
+    };
     
-    // 2. MAP
+    // 2. MAP (Fond clair "Positron")
     const map = new maplibregl.Map({
         container: 'map',
-        style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-        center: [7.35, 47.9], zoom: 9, pitch: 50, antialias: true
+        style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json', // Style clair
+        center: [7.35, 47.9], zoom: 9.5, pitch: 50, bearing: -10, antialias: true
     });
 
     map.on('load', () => {
-        // --- COUCHES ---
-        map.addSource('sat', { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256 });
-        map.addLayer({ id: 'sat', type: 'raster', source: 'sat', paint: { 'raster-opacity': 0 } });
+        if (typeof forestData === 'undefined') { alert("Data.js manquant !"); return; }
 
+        // SATELLITE
+        map.addSource('sat', { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256 });
+        map.addLayer({ id: 'sat', type: 'raster', source: 'sat', paint: { 'raster-opacity': 0 }, layout: { 'visibility': 'visible' } });
+
+        // COMMUNES (Lignes grises foncées)
         fetch('https://geo.api.gouv.fr/departements/68/communes?geometry=contour&format=geojson&type=commune-actuelle')
             .then(r => r.json()).then(d => {
                 map.addSource('com', { type: 'geojson', data: d });
-                map.addLayer({ id: 'com', type: 'line', source: 'com', paint: { 'line-color': '#fff', 'line-opacity': 0 }, layout: {'visibility':'none'} });
+                map.addLayer({ id: 'com', type: 'line', source: 'com', paint: { 'line-color': '#1e293b', 'line-width': 1.5, 'line-opacity': 0 }, layout: {'visibility':'none'} });
             });
 
-        // --- DONNEES ---
-        if(typeof forestData !== 'undefined') {
-            map.addSource('foret', { type: 'geojson', data: forestData });
-            map.addLayer({
-                id: 'foret-3d', type: 'fill-extrusion', source: 'foret',
-                paint: {
-                    'fill-extrusion-color': ['interpolate', ['linear'], ['get', 'DN'], 0, colors[0], 4, colors[4]],
-                    'fill-extrusion-height': ['interpolate', ['linear'], ['get', 'DN'], 0, 50, 4, 3000],
-                    'fill-extrusion-opacity': 0.9
-                }
-            });
-            
-            // Zoom
-            const b = new maplibregl.LngLatBounds();
-            forestData.features.forEach(f => {
-               const c = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] : f.geometry.coordinates.flat(1);
-               c.forEach(p => b.extend(p));
-            });
-            if(!b.isEmpty()) map.fitBounds(b, { padding: 50 });
-
-            // Popup
-            const popup = new maplibregl.Popup({closeButton:false, closeOnClick:false});
-            map.on('mousemove', 'foret-3d', (e)=>{
-                map.getCanvas().style.cursor = 'pointer';
-                const p = e.features[0].properties;
-                popup.setLngLat(e.lngLat).setHTML(`Niveau ${p.DN}<br>${(p.surf/10000).toFixed(1)} ha`).addTo(map);
-            });
-            map.on('mouseleave', 'foret-3d', ()=>{ map.getCanvas().style.cursor=''; popup.remove(); });
-
-            // Lancer les calculs
-            processData(forestData);
-        } else {
-            alert("Erreur: data.js manquant");
+        // FORET 3D
+        map.addSource('foret', { type: 'geojson', data: forestData });
+        map.addLayer({
+            id: 'foret-3d', type: 'fill-extrusion', source: 'foret',
+            paint: {
+    // La couleur reste la même
+            'fill-extrusion-color': ['interpolate', ['linear'], ['get', 'DN'], 0, config.colors[0], 1, config.colors[1], 2, config.colors[2], 3, config.colors[3], 4, config.colors[4]],
+    
+    // --- MODIFICATION ICI : INVERSION DE LA HAUTEUR ---
+    // DN 0 (Faible/Vert) = 3000m (Haut)
+    // DN 4 (Critique/Rouge) = 50m (Bas/Sol)
+            'fill-extrusion-height': ['interpolate', ['linear'], ['get', 'DN'], 
+                0, 3000, 
+                4, 50
+        ], 
+    
+        'fill-extrusion-opacity': 0.85,
+        'fill-extrusion-vertical-gradient': true
         }
     });
+        
+        // Auto-Zoom
+        const b = new maplibregl.LngLatBounds();
+        forestData.features.forEach(f => {
+            const c = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] : f.geometry.coordinates.flat(1);
+            c.forEach(p => b.extend(p));
+        });
+        if(!b.isEmpty()) map.fitBounds(b, { padding: {top: 50, bottom: 50, left: 400, right: 50}, pitch: 55 });
 
-    // 3. CALCULS ET AFFICHAGE
+        // Popup Claire
+        const popup = new maplibregl.Popup({closeButton:false, closeOnClick:false});
+        map.on('mousemove', 'foret-3d', (e)=>{
+            map.getCanvas().style.cursor = 'pointer';
+            const p = e.features[0].properties;
+            popup.setLngLat(e.lngLat).setHTML(`
+                <div style="font-size:0.75rem; text-transform:uppercase; color:#64748b; font-weight:600;">Niveau de Risque</div>
+                <div style="font-size:1.1rem; font-weight:800; color:${config.colors[p.DN]}">${config.labels[p.DN]} (${p.DN})</div>
+                <div style="margin-top:5px; color:#1e293b; font-weight:500;">${Math.round(p.surf/10000).toLocaleString()} Hectares</div>
+            `).addTo(map);
+        });
+        map.on('mouseleave', 'foret-3d', ()=>{ map.getCanvas().style.cursor=''; popup.remove(); });
+
+        processData(forestData);
+    });
+
+    // 3. LOGIQUE
     function processData(data) {
         let dist = [0,0,0,0,0];
         let total = 0, riskSum = 0, high = 0;
@@ -175,74 +274,61 @@
             if(dn >= 3) high += surf;
         });
 
-        document.getElementById('val-surf').innerText = (high/10000).toFixed(0);
-        document.getElementById('val-ivm').innerText = (riskSum/total).toFixed(2) + "/4";
+        document.getElementById('val-surf').innerText = (high/10000).toFixed(0).toLocaleString();
+        const ivm = total > 0 ? (riskSum/total).toFixed(2) : "0";
+        const kpiVal = document.getElementById('val-ivm');
+        kpiVal.innerText = ivm + "/4";
+        // Couleur dynamique sobre
+        kpiVal.style.color = ivm < 2.5 ? config.colors[0] : config.colors[4];
 
         initCharts(dist);
     }
 
-    // 4. GRAPHIQUES (Code Blindé)
     function initCharts(dataArr) {
         const total = dataArr.reduce((a,b)=>a+b,0);
+        // Sécurité : si pas de données, on met des données de démo pour que le graphique s'affiche
+        let finalData = total > 0 ? dataArr.map(d => ((d/total)*100).toFixed(1)) : [20,20,20,20,20];
         
-        // SECURITÉ : Si aucune donnée, on met des valeurs bidon pour afficher le graphique quand même
-        let finalData = dataArr.map(d => ((d/total)*100).toFixed(1));
-        if (total === 0) {
-            console.warn("Pas de données ! Affichage démo.");
-            finalData = [20, 20, 20, 20, 20]; // Données de test
-        }
-
-        Chart.defaults.color = '#94a3b8';
+        // Config couleurs ChartJS pour thème clair
+        Chart.defaults.color = '#64748b';
+        Chart.defaults.borderColor = 'rgba(0,0,0,0.05)';
         Chart.defaults.font.family = 'Outfit';
 
-        // POLAR (Le graphique qui posait problème)
-        const ctxPolar = document.getElementById('polarChart');
-        if (ctxPolar) {
-            new Chart(ctxPolar, {
-                type: 'polarArea',
-                data: {
-                    labels: ['Nul', 'Faible', 'Moyen', 'Fort', 'Critique'],
-                    datasets: [{
-                        data: finalData,
-                        backgroundColor: colors.map(c => c + 'BB'),
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false, // Important !
-                    scales: {
-                        r: {
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            ticks: { display: false, backdropColor: 'transparent' }
-                        }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
+        // POLAR CHART
+        new Chart(document.getElementById('polarChart'), {
+            type: 'polarArea',
+            data: {
+                labels: config.labels,
+                datasets: [{
+                    data: finalData,
+                    // Couleurs un peu transparentes
+                    backgroundColor: config.colors.map(c => c + 'DD'), 
+                    borderWidth: 1,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { r: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { display: false, backdropColor: 'transparent' }, pointLabels: { display: true, font: {size: 11, weight: '600'} } } },
+                plugins: { legend: { display: false } }
+            }
+        });
 
         // BAR CHART
-        const ctxBar = document.getElementById('barChart');
-        if (ctxBar) {
-            new Chart(ctxBar, {
-                type: 'bar',
-                data: {
-                    labels: ['Nul', 'Faible', 'Moyen', 'Fort', 'Critique'],
-                    datasets: [{ data: finalData, backgroundColor: colors, borderRadius: 4 }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { x: { grid: { color: '#334155' } }, y: { grid: { display: false } } }
-                }
-            });
-        }
+        new Chart(document.getElementById('barChart'), {
+            type: 'bar',
+            data: {
+                labels: config.labels,
+                datasets: [{ data: finalData, backgroundColor: config.colors, borderRadius: 4, barPercentage: 0.6 }]
+            },
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { x: { grid: { display:false }, ticks: {callback: v=>v+'%'} }, y: { grid: { display:false } } }
+            }
+        });
     }
 
-    // 5. INTERACTION
     window.toggleLayer = function(l) {
         const btn = event.currentTarget;
         btn.classList.toggle('active');
@@ -255,7 +341,43 @@
             map.setPaintProperty('com', 'line-opacity', v==='visible'?0:0.6);
         }
     }
-</script>
+    // --- NOUVELLE LOGIQUE DE FILTRE ---
 
+// 1. État initial : tout est affiché (0, 1, 2, 3, 4)
+let activeFilters = [0, 1, 2, 3, 4];
+
+// 2. Générer les boutons HTML dynamiquement
+const filterContainer = document.getElementById('filter-container');
+config.labels.forEach((label, index) => {
+    const btn = document.createElement('div');
+    btn.className = 'filter-btn active';
+    btn.innerText = label;
+    // On passe la couleur correspondante via une variable CSS pour le style
+    btn.style.setProperty('--btn-color', config.colors[index]);
+    btn.onclick = () => toggleFilter(index, btn);
+    filterContainer.appendChild(btn);
+});
+
+// 3. Fonction qui gère le clic
+function toggleFilter(dnIndex, btnElement) {
+    const idx = activeFilters.indexOf(dnIndex);
+    
+    if (idx > -1) {
+        // Si présent, on l'enlève (sauf si c'est le dernier pour éviter une erreur map)
+        if(activeFilters.length > 1) {
+            activeFilters.splice(idx, 1);
+            btnElement.classList.remove('active');
+        }
+    } else {
+        // Sinon on l'ajoute
+        activeFilters.push(dnIndex);
+        btnElement.classList.add('active');
+    }
+
+    // Appliquer le filtre MapLibre
+    // Syntaxe: ['in', ['get', 'DN'], ['literal', [0, 1...]]]
+    map.setFilter('foret-3d', ['in', ['get', 'DN'], ['literal', activeFilters]]);
+}
+</script>
 </body>
 </html>
