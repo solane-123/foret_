@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forest Guard • Grand Est</title>
+    <title>Observatoire Enjeux Forestiers • 68</title>
     
     <script src='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js'></script>
     <link href='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css' rel='stylesheet' />
@@ -16,7 +16,7 @@
     <script src="data.js"></script>
 
     <style>
-        /* --- DESIGN FIGÉ (Charte DataGrandEst) --- */
+        /* --- DESIGN SYSTEM --- */
         :root {
             --brand-primary: #004578; 
             --brand-light: #0078d4;
@@ -32,81 +32,128 @@
         }
 
         body { margin: 0; font-family: var(--font-body); background: var(--bg-app); color: var(--text-dark); overflow: hidden; }
-        
         .page { position: absolute; inset: 0; transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.4s; z-index: 10; background: var(--bg-app); }
         .page.hidden { transform: translateY(-100vh); opacity: 0; pointer-events: none; z-index: 0; }
 
-        /* LANDING */
-        #landing { display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(160deg, var(--brand-primary) 0%, #002050 100%); color: white; padding: 20px; }
-        .landing-container { max-width: 900px; width: 100%; text-align: center; }
-        .brand-logo { width: 80px; height: 80px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); border-radius: 16px; font-size: 2.5rem; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px; color: var(--brand-accent); }
-        h1.portal-title { font-family: var(--font-head); font-size: 3.5rem; margin: 0; letter-spacing: -1px; font-weight: 800; }
-        p.portal-subtitle { font-size: 1.2rem; opacity: 0.8; margin-top: 10px; font-weight: 300; max-width: 600px; margin-left: auto; margin-right: auto; }
-        .btn-enter { background: var(--brand-accent); color: #002050; border: none; padding: 18px 40px; border-radius: 4px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 40px; margin-bottom: 60px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-enter:hover { background: white; transform: scale(1.05); }
-        .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; }
-        .feature-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 25px; border-radius: 8px; backdrop-filter: blur(5px); transition: transform 0.3s; }
-        .feature-card:hover { background: rgba(255,255,255,0.1); }
-        .feature-card h3 { margin: 0 0 10px; font-family: var(--font-head); color: var(--brand-accent); font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
-        .feature-card p { margin: 0; font-size: 0.9rem; line-height: 1.6; opacity: 0.8; }
+        /* --- LANDING PAGE --- */
+        #landing { display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(160deg, var(--brand-primary) 0%, #002050 100%); color: white; padding: 20px; overflow-y: auto; }
+        .landing-container { max-width: 1100px; width: 100%; text-align: center; padding-top: 20px; padding-bottom: 20px; }
+        
+        /* --- LOGO STYLES (Ajusté pour le style Proposition 2) --- */
+        .brand-logo { 
+            width: 160px; 
+            height: 180px; 
+            background: transparent; 
+            border: none; 
+            backdrop-filter: none; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin-bottom: 20px; 
+        }
+        
+        /* Effet de survol sur le SVG */
+        .brand-logo svg {
+            filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.3));
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .brand-logo:hover svg {
+            transform: scale(1.08);
+        }
+        
+        h1.portal-title { font-family: var(--font-head); font-size: 3rem; margin: 0; letter-spacing: -1px; font-weight: 800; text-transform: uppercase; }
+        p.portal-subtitle { font-size: 1.2rem; opacity: 0.9; margin-top: 5px; font-weight: 400; max-width: 800px; margin-left: auto; margin-right: auto; }
+        
+        /* Contexte du devoir */
+        .project-context {
+            max-width: 800px; margin: 30px auto 40px; font-size: 0.95rem; line-height: 1.6; 
+            background: rgba(255,255,255,0.1); padding: 20px 30px; border-radius: 8px;
+            border-left: 4px solid var(--brand-accent); text-align: left;
+        }
 
-        /* APP LAYOUT */
+        .btn-enter { background: var(--brand-accent); color: #002050; border: none; padding: 16px 40px; border-radius: 4px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-bottom: 50px; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-enter:hover { background: white; transform: scale(1.05); }
+        
+        .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; text-align: left; }
+        .feature-card { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); padding: 30px; border-radius: 12px; backdrop-filter: blur(10px); transition: transform 0.3s; min-height: 200px; }
+        .feature-card:hover { background: rgba(255,255,255,0.12); }
+        .feature-card h3 { margin: 0 0 15px; font-family: var(--font-head); color: var(--brand-accent); font-size: 1.2rem; display: flex; align-items: center; gap: 12px; }
+        .feature-card p { margin: 0; font-size: 0.9rem; line-height: 1.7; opacity: 0.9; }
+
+        /* --- APP LAYOUT --- */
         #app { display: flex; height: 100vh; width: 100vw; }
         #map { flex: 1; height: 100%; position:relative; }
         
-        /* SIDEBAR */
-        .sidebar { position: absolute; top: 0; left: 0; bottom: 0; width: 400px; background: var(--surface); z-index: 20; display: flex; flex-direction: column; box-shadow: 5px 0 15px rgba(0,0,0,0.05); border-right: 1px solid var(--border); }
-        .sb-header { padding: 25px; background: var(--brand-primary); color: white; display: flex; align-items: center; justify-content: space-between; }
-        .sb-title h2 { margin: 0; font-family: var(--font-head); font-size: 1.4rem; font-weight: 700; }
+        .sidebar { position: absolute; top: 0; left: 0; bottom: 0; width: 420px; background: var(--surface); z-index: 20; display: flex; flex-direction: column; box-shadow: 5px 0 15px rgba(0,0,0,0.05); border-right: 1px solid var(--border); }
+        
+        .sb-header { padding: 20px 25px; background: var(--brand-primary); color: white; display: flex; align-items: center; justify-content: space-between; }
+        .sb-title h2 { margin: 0; font-family: var(--font-head); font-size: 1.3rem; font-weight: 700; text-transform: uppercase; }
         .sb-title span { font-size: 0.75rem; opacity: 0.7; letter-spacing: 0.5px; text-transform: uppercase; }
         .btn-home { background: rgba(255,255,255,0.1); border:none; color:white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .btn-home:hover { background: var(--brand-accent); color: var(--brand-primary); }
+        
         .sb-scroll { flex: 1; overflow-y: auto; padding: 25px; position: relative; }
 
-        /* KPI */
+        /* Phrase d'intro Sidebar */
+        .sidebar-intro { font-size: 0.85rem; color: var(--text-gray); margin-bottom: 20px; line-height: 1.4; font-style: italic; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+
+        /* KPI & TOOLTIP */
         .kpi-row { display: flex; gap: 15px; margin-bottom: 25px; position: relative; z-index: 5; }
         .kpi-box { flex: 1; border-left: 4px solid var(--brand-accent); padding-left: 15px; }
         .kpi-val { display: block; font-family: var(--font-head); font-weight: 700; font-size: 2rem; color: var(--text-dark); line-height: 1; }
         .kpi-lbl { font-size: 0.75rem; color: var(--text-gray); font-weight: 600; text-transform: uppercase; margin-top: 5px; display: flex; align-items: center; gap: 6px;}
 
-        /* TOOLTIP */
         .info-icon { cursor: pointer; color: var(--brand-light); position: relative; }
         .info-icon:hover .tooltip-box { visibility: visible; opacity: 1; transform: translateY(0); }
-        .tooltip-box { visibility: hidden; opacity: 0; position: absolute; top: 25px; right: -10px; width: 220px; background-color: #002050; color: #fff; text-transform: none; text-align: center; padding: 12px; border-radius: 6px; font-size: 0.75rem; line-height: 1.4; font-weight: 400; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: all 0.2s ease; transform: translateY(-5px); z-index: 9999; pointer-events: none; }
-        .tooltip-box::after { content: ""; position: absolute; bottom: 100%; right: 14px; border-width: 6px; border-style: solid; border-color: transparent transparent #002050 transparent; }
+        .tooltip-box { 
+            visibility: hidden; opacity: 0; position: absolute; 
+            top: 30px; right: -50px; width: 280px;
+            background-color: #002050; color: #fff; text-transform: none; text-align: left; 
+            padding: 15px; border-radius: 8px; font-size: 0.8rem; line-height: 1.5; font-weight: 400; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25); transition: all 0.2s ease; transform: translateY(-5px); z-index: 9999; pointer-events: none; 
+        }
+        .tooltip-box strong { color: var(--brand-accent); display: block; margin-bottom: 5px; font-size: 0.9rem;}
+        .tooltip-box ul { padding-left: 20px; margin: 5px 0; }
+        .tooltip-box::after { content: ""; position: absolute; bottom: 100%; right: 54px; border-width: 7px; border-style: solid; border-color: transparent transparent #002050 transparent; }
 
         /* SELECTEUR */
         .select-commune { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: #f8f9fa; color: var(--text-dark); font-family: var(--font-body); font-size: 0.85rem; font-weight: 500; cursor: pointer; outline: none; }
         .select-commune:focus { border-color: var(--brand-primary); }
         .select-loader { font-size: 0.8rem; color: var(--brand-primary); margin-top: 10px; font-weight:600; display: none; align-items:center; gap:8px; }
 
-        /* FILTRES AVEC COULEUR */
+        /* FILTRES */
         .filter-section { margin-bottom: 25px; padding: 15px; background: white; border: 1px solid var(--border); border-radius: 8px; }
         .filter-header { font-size: 0.75rem; font-weight: 700; color: var(--brand-primary); margin-bottom: 10px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
         .tags-group { display: flex; gap: 8px; flex-wrap: wrap; }
         .tag { font-size: 0.7rem; padding: 6px 12px; border-radius: 4px; cursor: pointer; background: #eff6fc; color: var(--text-gray); font-weight: 600; border: 1px solid transparent; transition: all 0.2s; }
         .tag:hover { opacity: 0.8; }
-        /* Style Actif avec couleur (géré par JS) */
         .tag.active { color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border-color: transparent; }
 
         /* VIZ & ACCORDIONS */
-        .viz-block { background: white; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+        .viz-block { background: white; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 20px; } 
         .viz-header { background: #f8f9fa; padding: 10px 15px; font-weight: 600; font-size: 0.85rem; color: var(--brand-primary); border-bottom: 1px solid var(--border); }
         .viz-body { padding: 15px; }
-        details.info-box { width: 100%; margin-bottom: 20px; }
-        details.info-box summary { background-color: var(--acc-header); color: var(--text-gray); padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+        
+        details.info-box { width: 100%; margin-bottom: 25px; }
+        details.info-box summary { background-color: var(--acc-header); color: var(--brand-primary); padding: 12px 15px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); transition: background 0.2s; }
+        details.info-box summary:hover { background: #e1dfdd; }
         details.info-box summary::-webkit-details-marker { display: none; }
-        details.info-box summary::after { content: '+'; font-weight: 800; font-size: 1rem; }
-        details.info-box[open] summary::after { content: '-'; }
-        details.info-box .info-content { padding: 12px; background: white; border: 1px solid var(--border); border-top: none; font-size: 0.75rem; color: var(--text-gray); line-height: 1.5; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; }
+        details.info-box summary::after { content: '+'; font-weight: 800; font-size: 1.1rem; color: var(--brand-light); }
+        details.info-box[open] summary::after { content: '-'; color: var(--brand-accent); }
+        details.info-box .info-content { padding: 15px; background: white; border: 1px solid var(--border); border-top: none; font-size: 0.8rem; color: var(--text-dark); line-height: 1.6; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; text-align: justify; }
+        details.info-box .info-content strong { color: var(--brand-primary); font-weight: 700; }
 
-        /* LAYER CONTROLS */
+        /* CONTROLS MAP */
         .layer-control { margin-top:auto; display:flex; flex-direction:column; gap:8px; }
         .layer-btn { padding:12px 15px; background:#e1dfdd; border-radius:4px; cursor:pointer; font-weight:600; font-size:0.85rem; display:flex; align-items:center; gap:10px; color:#201f1e; transition: background 0.2s; border: 1px solid transparent; }
         .layer-btn:hover { background: #d0d0d0; }
-        .layer-btn.active { background: white; border-color: var(--brand-primary); color: var(--brand-primary); }
+        .layer-btn.active { background: white; border-color: var(--brand-primary); color: var(--brand-primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-        /* POPUP */
+        .maplibregl-ctrl-top-right { top: 10px; right: 10px; }
+        .maplibregl-ctrl-bottom-right { bottom: 20px; right: 10px; }
+        .maplibregl-ctrl-group { border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); border:none; }
+        .maplibregl-ctrl-scale { border: none; border-top: 2px solid var(--brand-primary); color: var(--brand-primary); font-weight: 600; font-family: var(--font-body); box-shadow: none; background: rgba(255,255,255,0.8); padding: 2px 5px; }
+
         .maplibregl-popup-content { padding: 0; border-radius: 4px; overflow: hidden; border: 1px solid var(--brand-primary); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .pop-head { background: var(--brand-primary); color: white; padding: 8px 12px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; }
         .pop-body { padding: 12px; font-size: 0.9rem; font-weight: 600; color: var(--text-dark); }
@@ -116,13 +163,66 @@
 
     <div id="landing" class="page">
         <div class="landing-container">
-            <div class="brand-logo"><i class="fa-solid fa-layer-group"></i></div>
-            <h1 class="portal-title">FOREST GUARD</h1>
-            <p class="portal-subtitle">Plateforme régionale de visualisation des risques incendie et d'analyse de la vulnérabilité forestière.</p>
-            <button class="btn-enter" onclick="enterApp()">Explorer les données <i class="fa-solid fa-arrow-right" style="margin-left:8px"></i></button>
+            
+            <div class="brand-logo">
+                <svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%;">
+                    <defs>
+                        <radialGradient id="shieldGrad" cx="50%" cy="40%" r="80%" fx="50%" fy="40%">
+                            <stop offset="0%" style="stop-color:#2a5a8a;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#0f2e50;stop-opacity:1" />
+                        </radialGradient>
+                        
+                        <linearGradient id="treeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#9fe64e;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#6dbf26;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+
+                    <path d="M50 115 C15 95 5 65 5 25 L50 5 L95 25 C95 65 85 95 50 115 Z" 
+                          fill="url(#shieldGrad)" 
+                          stroke="#4a90e2" 
+                          stroke-width="3"/>
+                    
+                    <path d="M20 30 L30 40 L25 50 M80 30 L70 40 L75 50 M15 60 L35 70 M85 60 L65 70" 
+                          stroke="#5d8bc1" stroke-width="2" fill="none" opacity="0.4" stroke-linecap="round"/>
+
+                    <g transform="translate(0, 5)">
+                        <path d="M46 65 L54 65 L56 95 L44 95 Z" fill="#6d4c41"/>
+                        
+                        <circle cx="50" cy="35" r="16" fill="url(#treeGrad)"/> <circle cx="36" cy="50" r="14" fill="url(#treeGrad)"/> <circle cx="64" cy="50" r="14" fill="url(#treeGrad)"/> <circle cx="45" cy="55" r="14" fill="url(#treeGrad)"/> <circle cx="55" cy="55" r="14" fill="url(#treeGrad)"/> <path d="M50 55 L50 68 M50 65 L40 55 M50 65 L60 55" stroke="#52821e" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+                    </g>
+                    
+                    </svg>
+            </div>
+
+            <h1 class="portal-title">OBSERVATOIRE DES ENJEUX FORESTIERS</h1>
+            <p class="portal-subtitle">Plateforme régionale de visualisation des risques incendie.</p>
+            
+            <div class="project-context">
+                <strong>Exercice de mise en situation :</strong><br>
+                Cette plateforme est un prototype développé en réponse à la demande de valorisation des données de sensibilité aux feux de forêt dans le Haut-Rhin. L'objectif est de proposer une représentation cartographique interactive et des datavisualisations adaptées aux différents publics (décideurs, experts), en structurant une réflexion autour de l'usage des données ouvertes (DataGrandEst).
+            </div>
+
+            <button class="btn-enter" onclick="enterApp()">
+                Explorer la donnée <i class="fa-solid fa-arrow-right" style="margin-left:8px"></i>
+            </button>
+
             <div class="features-grid">
-                <div class="feature-card"><h3><i class="fa-solid fa-database"></i> Source & Méthodologie</h3><p>Données issues du référentiel régional 2025. L'indice IVM est calculé par croisement des données IGN (végétation) et météo (hygrométrie).</p></div>
-                <div class="feature-card"><h3><i class="fa-solid fa-cube"></i> Visualisation 3D Inversée</h3><p>Pour une meilleure lisibilité, l'axe Z est inversé : les zones <strong>Critiques (Rouges)</strong> sont au sol (niveau 0), tandis que les zones sûres sont surélevées.</p></div>
+                <div class="feature-card">
+                    <h3><i class="fa-solid fa-database"></i> Source des Données</h3>
+                    <p>
+                        Les données visualisées proviennent du jeu de données <strong>"Sensibilité aux feux de forêt"</strong> (DataGrandEst). 
+                        Le niveau de sensibilité intègre la nature de la végétation et sa combustibilité. 
+                        Cette information est cruciale pour anticiper les feux dépassant la capacité de lutte initiale.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <h3><i class="fa-solid fa-shield-halved"></i> Valorisation & Décision</h3>
+                    <p>
+                        Cet outil exploratoire permet de croiser l'information brute avec le découpage administratif (Communes). 
+                        Il offre une aide à la décision pour structurer les actions de prévention et adapter les politiques locales face à l'intensification du risque.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
@@ -130,15 +230,22 @@
     <div id="app" class="page hidden">
         <aside class="sidebar">
             <div class="sb-header">
-                <div class="sb-title"><h2>Forest Guard</h2><span>Région Grand Est • 68</span></div>
-                <button class="btn-home" onclick="goHome()" title="Retour Accueil"><i class="fa-solid fa-xmark"></i></button>
+                <div class="sb-title">
+                    <h2>Observatoire</h2>
+                    <span>Enjeux Forestiers • 68</span>
+                </div>
+                <button class="btn-home" onclick="goHome()" title="Retour au portail"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
             <div class="sb-scroll">
                 
+                <div class="sidebar-intro">
+                    Tableau de bord exploratoire pour l'analyse de la sensibilité de la végétation aux feux de forêt.
+                </div>
+
                 <div class="viz-block" style="border:none; box-shadow:none; background:transparent;">
                     <div class="viz-header" style="background:transparent; padding-left:0; border:none; margin-bottom:5px;">
-                        <i class="fa-solid fa-city"></i> CHOIX DU TERRITOIRE
+                        <i class="fa-solid fa-city"></i> PÉRIMÈTRE D'ANALYSE
                     </div>
                     <select id="commune-select" class="select-commune" onchange="changeCommune(this.value)" disabled>
                         <option value="">Chargement des communes...</option>
@@ -153,26 +260,48 @@
                     </div>
                     <div class="kpi-box">
                         <span class="kpi-val" id="val-ivm">--</span>
-                        <div class="kpi-lbl">Indice Moyen / 4 <span class="info-icon"><i class="fa-solid fa-circle-info" style="margin-left:5px;"></i><div class="tooltip-box"><strong>Indice de Vulnérabilité (IVM)</strong><br>Calculé de 0 (Nul) à 4 (Critique) selon la densité de combustible et la sécheresse des sols.</div></span></div>
+                        <div class="kpi-lbl">
+                            Indice Moyen / 4 
+                            <span class="info-icon">
+                                <i class="fa-solid fa-circle-info" style="margin-left:5px;"></i>
+                                <div class="tooltip-box">
+                                    <strong>Indice de Sensibilité Moyen</strong>
+                                    Moyenne pondérée du niveau de sensibilité (DN) des zones forestières affichées. 
+                                    <br><br>
+                                    Basé sur la classification DataGrandEst (0 à 4) évaluant la combustibilité de la végétation.
+                                </div>
+                            </span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="filter-section">
-                    <div class="filter-header"><i class="fa-solid fa-filter"></i> FILTRER PAR RISQUE</div>
+                    <div class="filter-header"><i class="fa-solid fa-filter"></i> FILTRER PAR NIVEAU DE RISQUE</div>
                     <div class="tags-group" id="filter-container"></div>
                 </div>
 
                 <div class="viz-block">
-                    <div class="viz-header"><span><i class="fa-solid fa-chart-pie"></i> VULNÉRABILITÉ GLOBALE</span></div>
+                    <div class="viz-header"><span><i class="fa-solid fa-chart-pie"></i> PROFIL DE VULNÉRABILITÉ</span></div>
                     <div class="viz-body" style="height: 200px;"><canvas id="polarChart"></canvas></div>
                 </div>
-                <details class="info-box"><summary>Comprendre ce graphique</summary><div class="info-content">Ce radar montre la distribution des surfaces. Une forme étirée vers une couleur indique une prédominance de ce niveau de risque.</div></details>
+                <details class="info-box">
+                    <summary>Lecture du Profil Radar</summary>
+                    <div class="info-content">
+                        Ce graphique permet de visualiser la répartition relative des surfaces sensibles sur le territoire sélectionné. Une forme étirée vers les couleurs chaudes indique une prédominance de végétation à forte combustibilité.
+                    </div>
+                </details>
 
                 <div class="viz-block">
-                    <div class="viz-header"><span><i class="fa-solid fa-chart-column"></i> DÉTAIL PAR NIVEAU</span></div>
+                    <div class="viz-header"><span><i class="fa-solid fa-chart-column"></i> RÉPARTITION SURFACIQUE</span></div>
                     <div class="viz-body" style="height: 160px;"><canvas id="barChart"></canvas></div>
                 </div>
-                <details class="info-box"><summary>Détail des données</summary><div class="info-content">Répartition en pourcentage de la surface totale visible. Permet d'identifier rapidement la proportion de zones critiques.</div></details>
+                <details class="info-box">
+                    <summary>Détail des surfaces exposées</summary>
+                    <div class="info-content">
+                        Donne les volumes exacts (en pourcentage de la surface visible) par classe de sensibilité. 
+                        Les communes avec une majorité de zones <strong>Fort</strong> ou <strong>Critique</strong> constituent des secteurs prioritaires pour la prévention et l'aménagement du territoire.
+                    </div>
+                </details>
 
                 <div class="layer-control">
                     <div class="layer-btn" onclick="toggleLayer('sat')" id="btn-sat"><i class="fa-solid fa-earth-europe"></i> Vue Satellite</div>
@@ -185,25 +314,18 @@
     </div>
 
     <script>
-        // === CONFIG ===
         const config = {
             riskColors: ['#10b981', '#34d399', '#facc15', '#fb923c', '#ef4444'], 
             labels: ['Nul', 'Faible', 'Moyen', 'Fort', 'Critique']
         };
 
-        // Etats de l'app
         let activeRiskFilters = [0, 1, 2, 3, 4];
         let selectedCommuneName = null;
         let communesGeoJSON = null; 
-        
-        // Données affichées (Globale ou Découpée)
         let currentDisplayData = null; 
-
-        // Charts
         let polarChart = null;
         let barChart = null;
 
-        // --- NAVIGATION ---
         function enterApp() {
             document.getElementById('landing').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
@@ -214,28 +336,43 @@
             document.getElementById('landing').classList.remove('hidden');
         }
 
-        // --- MAP INIT ---
         const map = new maplibregl.Map({
             container: 'map',
             style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-            center: [7.35, 47.9], zoom: 9.5, pitch: 50, bearing: -10, antialias: true
+            center: [7.35, 47.9], zoom: 9.5, pitch: 50, bearing: -10, antialias: true,
+            attributionControl: false
         });
+
+        // NORD ET ECHELLE
+        map.addControl(new maplibregl.NavigationControl({ showCompass: true, showZoom: true, visualizePitch: true }), 'top-right');
+        map.addControl(new maplibregl.ScaleControl({ maxWidth: 100, unit: 'metric' }), 'bottom-right');
+        map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
 
         map.on('load', async () => {
             if (typeof forestData === 'undefined') { console.error("Data missing"); return; }
-            
-            // Initialisation des données courantes avec tout le département
             currentDisplayData = forestData;
 
-            // 1. Récupérer les contours communaux
+            const layers = map.getStyle().layers;
+            let labelLayerId;
+            for (let i = 0; i < layers.length; i++) {
+                if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
+                    labelLayerId = layers[i].id;
+                    break;
+                }
+            }
+            
+            map.addSource('sat', { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256 });
+            map.addLayer({ 
+                id: 'sat', type: 'raster', source: 'sat', 
+                paint: { 'raster-opacity': 0 } 
+            }, labelLayerId); 
+
             try {
                 const res = await fetch('https://geo.api.gouv.fr/departements/68/communes?geometry=contour&format=geojson');
                 communesGeoJSON = await res.json();
                 
-                // Remplir le menu déroulant
                 const select = document.getElementById('commune-select');
-                select.innerHTML = '<option value="">Tout le département</option>';
-                // Tri alphabétique
+                select.innerHTML = '<option value="">Tout le département (Vue d\'ensemble)</option>';
                 communesGeoJSON.features.sort((a,b) => a.properties.nom.localeCompare(b.properties.nom));
                 communesGeoJSON.features.forEach(f => {
                     const opt = document.createElement('option');
@@ -245,64 +382,52 @@
                 });
                 select.disabled = false;
 
-                // Ajouter source Communes
                 map.addSource('com', { type: 'geojson', data: communesGeoJSON });
                 map.addLayer({ 
                     id: 'com', type: 'line', source: 'com', 
                     paint: { 'line-color': '#1e293b', 'line-width': 2, 'line-opacity': 0 },
                     layout: { 'visibility': 'none' } 
-                });
-
+                }, labelLayerId);
             } catch(e) { console.error("Erreur API Gouv", e); }
 
-            // 2. Ajouter source Forêt (vide au début, on la remplit après)
-            // Note: On utilise 'currentDisplayData' pour la source
             map.addSource('foret', { type: 'geojson', data: currentDisplayData });
-            
             map.addLayer({
                 id: 'foret-3d', type: 'fill-extrusion', source: 'foret',
                 paint: {
                     'fill-extrusion-color': ['interpolate', ['linear'], ['get', 'DN'], 0, config.riskColors[0], 1, config.riskColors[1], 2, config.riskColors[2], 3, config.riskColors[3], 4, config.riskColors[4]],
-                    'fill-extrusion-height': ['interpolate', ['linear'], ['get', 'DN'], 0, 3000, 4, 50],
+                    'fill-extrusion-height': ['interpolate', ['linear'], ['get', 'DN'], 0, 2500, 4, 100],
                     'fill-extrusion-opacity': 0.9,
                     'fill-extrusion-vertical-gradient': true
                 }
-            });
+            }, labelLayerId);
 
-            // 3. Source Sat
-            map.addSource('sat', { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256 });
-            map.addLayer({ id: 'sat', type: 'raster', source: 'sat', paint: { 'raster-opacity': 0 } });
-
-            // 4. Initialisations
             zoomToAll();
-            updateInterface(); // KPI & Charts
-            initFilters(); // Boutons
+            updateInterface(); 
+            initFilters(); 
 
-            // Popup
-            const popup = new maplibregl.Popup({closeButton:false, closeOnClick:false});
+            const popup = new maplibregl.Popup({closeButton:false, closeOnClick:false, maxWidth: '300px'});
             map.on('mousemove', 'foret-3d', (e)=>{
                 map.getCanvas().style.cursor = 'pointer';
                 const p = e.features[0].properties;
-                // Calcul de surface affichée (peut être approximatif après découpe)
-                const areaHa = Math.round(p.surf/10000).toLocaleString(); 
-                
+                const areaHa = Math.round(turf.area(e.features[0])/10000).toLocaleString(undefined, {maximumFractionDigits: 1}); 
                 popup.setLngLat(e.lngLat).setHTML(`
-                    <div class="pop-head" style="background:${config.riskColors[p.DN]}">RISQUE ${config.labels[p.DN]}</div>
-                    <div class="pop-body">${areaHa} Ha</div>
+                    <div class="pop-head" style="background:${config.riskColors[p.DN]}">NIVEAU ${config.labels[p.DN]} (Classe ${p.DN})</div>
+                    <div class="pop-body" style="display:flex; justify-content:space-between;">
+                        <span>Surface de cette zone :</span>
+                        <strong>${areaHa} Ha</strong>
+                    </div>
                 `).addTo(map);
             });
             map.on('mouseleave', 'foret-3d', ()=>{ map.getCanvas().style.cursor=''; popup.remove(); });
         });
 
-        // --- COEUR DU SYSTÈME : DÉCOUPE GÉOGRAPHIQUE ---
-        
         async function changeCommune(nom) {
             selectedCommuneName = nom === "" ? null : nom;
             const loader = document.getElementById('loading-msg');
+            const select = document.getElementById('commune-select');
             
             if (!selectedCommuneName) {
-                // CAS 1 : Tout le département
-                currentDisplayData = forestData; // On remet les données brutes
+                currentDisplayData = forestData;
                 map.getSource('foret').setData(currentDisplayData);
                 zoomToAll();
                 updateInterface();
@@ -310,110 +435,75 @@
                 return;
             }
 
-            // CAS 2 : Une commune spécifique
-            loader.style.display = 'flex'; // Afficher loader
-            
-            // Petit délai pour laisser le UI se mettre à jour avant le gros calcul
+            loader.style.display = 'flex';
+            select.disabled = true;
+            map.getCanvas().style.cursor = 'wait';
+
             setTimeout(() => {
                 const communeFeature = communesGeoJSON.features.find(f => f.properties.nom === selectedCommuneName);
-                
                 if (communeFeature) {
-                    // A. Zoom sur la commune
                     const b = new maplibregl.LngLatBounds();
-                    // Gestion Polygon vs MultiPolygon pour le zoom
                     const coords = communeFeature.geometry.type === 'Polygon' ? communeFeature.geometry.coordinates[0] : communeFeature.geometry.coordinates.flat(1);
                     coords.forEach(p => b.extend(p));
-                    map.fitBounds(b, { padding: 20 });
+                    map.fitBounds(b, { padding: 50, maxZoom: 14 });
 
-                    // B. DÉCOUPE (CLIPPING) avec Turf.js
-                    // On va créer un nouveau FeatureCollection contenant les morceaux de forêt
                     const clippedFeatures = [];
-
                     forestData.features.forEach(forest => {
-                        // Optimisation : On vérifie d'abord si les boites englobantes se touchent (très rapide)
-                        // turf.booleanDisjoint retourne true si ça ne se touche pas du tout
-                        // On utilise try/catch car turf peut être capricieux sur des géométries invalides
                         try {
-                            const intersection = turf.intersect(forest, communeFeature);
-                            if (intersection) {
-                                // On garde les propriétés originales (Niveau de risque DN, etc)
-                                intersection.properties = { ...forest.properties };
-                                
-                                // On recalcule la surface exacte du morceau découpé (optionnel mais plus précis)
-                                // intersection.properties.surf = turf.area(intersection); 
-                                
-                                clippedFeatures.push(intersection);
+                            if(!turf.booleanDisjoint(forest, communeFeature)) {
+                                const intersection = turf.intersect(forest, communeFeature);
+                                if (intersection) {
+                                    intersection.properties = { ...forest.properties }; 
+                                    clippedFeatures.push(intersection);
+                                }
                             }
-                        } catch(e) {
-                            // Ignorer les géométries corrompues
-                        }
+                        } catch(e) { }
                     });
 
-                    // C. Mise à jour de la carte avec les morceaux découpés
                     currentDisplayData = { type: 'FeatureCollection', features: clippedFeatures };
                     map.getSource('foret').setData(currentDisplayData);
                 }
-
-                // D. Mise à jour des stats et filtres
                 updateInterface();
                 applyRiskFilter();
-                
-                loader.style.display = 'none'; // Cacher loader
-            }, 50);
+                loader.style.display = 'none';
+                select.disabled = false;
+                map.getCanvas().style.cursor = '';
+            }, 100);
         }
 
-        // --- FILTRES VISUELS (Risque) ---
         function applyRiskFilter() {
-            // On filtre simplement sur la propriété DN, quel que soit le jeu de données chargé (Entier ou Découpé)
             map.setFilter('foret-3d', ['in', ['get', 'DN'], ['literal', activeRiskFilters]]);
         }
 
-        // --- INTERFACE & KPI ---
         function updateInterface() {
-            // On travaille sur currentDisplayData (qui est soit tout, soit découpé)
-            // Mais pour les KPI, on doit aussi respecter le filtre de risque actif ?
-            // Généralement les KPI montrent la réalité du terrain visible.
-            
-            // Pour simplifier : KPI = Stats sur les polygones présents dans currentDisplayData
-            // (indépendamment du filtre visuel bouton, ou alors on l'applique aussi)
-            
-            // CALCULONS LES STATS SUR LA DONNÉE GÉOGRAPHIQUE COURANTE
             let dist = [0,0,0,0,0];
-            let totalSurf = 0, sumRisk = 0, highRiskSurf = 0;
+            let totalSurf = 0, sumRiskWeighted = 0, highRiskSurf = 0;
 
             currentDisplayData.features.forEach(f => {
                 const dn = f.properties.DN; 
-                // Calcul de surface précis via Turf pour être cohérent avec la découpe ?
-                // Ou on garde la propriété 'surf' (m2) d'origine ?
-                // Si on a découpé, la propriété 'surf' est celle du polygone entier d'origine.
-                // Pour être PRO, on recalcule l'aire du morceau visible.
-                const s = turf.area(f); // Surface en m² calculée géométriquement
-
+                const s = turf.area(f); 
                 dist[dn] += s;
                 totalSurf += s;
-                sumRisk += (s * dn);
+                sumRiskWeighted += (s * dn);
                 if(dn >= 3) highRiskSurf += s;
             });
 
-            // Affichage KPI (conversion m² -> Hectares)
-            document.getElementById('val-surf').innerText = (highRiskSurf/10000).toFixed(0).toLocaleString();
-            document.getElementById('val-ivm').innerText = totalSurf > 0 ? (sumRisk/totalSurf).toFixed(2) : "0";
-
+            document.getElementById('val-surf').innerText = (highRiskSurf/10000).toLocaleString(undefined, {maximumFractionDigits: 0});
+            document.getElementById('val-ivm').innerText = totalSurf > 0 ? (sumRiskWeighted/totalSurf).toFixed(2) : "-";
             updateCharts(dist);
         }
 
-        function updateCharts(dataArr) {
-            const total = dataArr.reduce((a,b)=>a+b,0);
-            // Données en %
-            const val = total > 0 ? dataArr.map(d => ((d/total)*100).toFixed(1)) : [0,0,0,0,0];
+        function updateCharts(dataArrSqMeters) {
+            const total = dataArrSqMeters.reduce((a,b)=>a+b,0);
+            const val = total > 0 ? dataArrSqMeters.map(d => ((d/total)*100).toFixed(1)) : [0,0,0,0,0];
             
             if(polarChart) { polarChart.data.datasets[0].data = val; polarChart.update(); }
             else {
                 Chart.defaults.font.family = 'Inter'; Chart.defaults.color = '#605e5c';
                 polarChart = new Chart(document.getElementById('polarChart'), {
                     type: 'polarArea',
-                    data: { labels: config.labels, datasets:[{ data:val, backgroundColor: config.riskColors.map(c=>c+'CC'), borderWidth:0 }] },
-                    options: { responsive:true, maintainAspectRatio:false, scales:{r:{ticks:{display:false}, grid:{color:'#e1dfdd'}}}, plugins:{legend:{display:false}} }
+                    data: { labels: config.labels, datasets:[{ data:val, backgroundColor: config.riskColors.map(c=>c+'CC'), borderWidth:1, borderColor:'white' }] },
+                    options: { responsive:true, maintainAspectRatio:false, scales:{r:{ticks:{display:false, backdropColor:'transparent'}, grid:{color:'#e1dfdd'}}}, plugins:{legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.parsed.r+" %"}}} }
                 });
             }
 
@@ -421,45 +511,36 @@
             else {
                 barChart = new Chart(document.getElementById('barChart'), {
                     type: 'bar',
-                    data: { labels: config.labels, datasets:[{ data:val, backgroundColor:config.riskColors, borderRadius:4 }] },
-                    options: { indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{display:false}, y:{grid:{display:false}}} }
+                    data: { labels: config.labels, datasets:[{ data:val, backgroundColor:config.riskColors, borderRadius:4, barPercentage: 0.7 }] },
+                    options: { indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.parsed.x+" %"}}}, scales:{x:{display:false, max:100}, y:{grid:{display:false}}} }
                 });
             }
         }
 
         function zoomToAll() {
             if(!forestData.features.length) return;
-            const b = new maplibregl.LngLatBounds();
-            // On scanne un peu pour trouver les bornes globales
-            forestData.features.forEach(f => {
-                 const coords = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] : f.geometry.coordinates[0][0];
-                 // On prend juste le premier point pour aller vite, sinon c'est lourd
-                 b.extend(coords[0]);
-            });
-            // Fallback manuel si besoin, centré sur Colmar
-            map.setCenter([7.35, 48.08]); map.setZoom(9);
+            map.flyTo({ center: [7.35, 48.0], zoom: 9, pitch: 50, bearing: -10 });
         }
 
-        // --- FILTRES BOUTONS COULEURS ---
         function initFilters() {
             const c = document.getElementById('filter-container');
             config.labels.forEach((l, i)=>{
                 const t = document.createElement('div');
                 t.className = 'tag active'; t.innerText = l;
-                t.style.backgroundColor = config.riskColors[i]; // Couleur initiale
+                t.style.backgroundColor = config.riskColors[i]; 
                 t.style.color = '#fff';
                 
                 t.onclick = ()=>{
                     const idx = activeRiskFilters.indexOf(i);
-                    if(idx>-1) { 
-                        if(activeRiskFilters.length>1) { 
-                            activeRiskFilters.splice(idx,1); 
+                    if(idx>-1) { 
+                        if(activeRiskFilters.length>1) { 
+                            activeRiskFilters.splice(idx,1); 
                             t.classList.remove('active');
-                            t.style.backgroundColor = '#eff6fc'; 
+                            t.style.backgroundColor = '#eff6fc'; 
                             t.style.color = '#605e5c';
-                        } 
-                    } else { 
-                        activeRiskFilters.push(i); 
+                        } 
+                    } else { 
+                        activeRiskFilters.push(i); 
                         t.classList.add('active');
                         t.style.backgroundColor = config.riskColors[i];
                         t.style.color = '#fff';
