@@ -35,14 +35,29 @@
         .page { position: absolute; inset: 0; transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.4s; z-index: 10; background: var(--bg-app); }
         .page.hidden { transform: translateY(-100vh); opacity: 0; pointer-events: none; z-index: 0; }
 
-        /* --- LANDING PAGE --- */
-        #landing { display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(160deg, var(--brand-primary) 0%, #002050 100%); color: white; padding: 20px; overflow-y: auto; }
-        .landing-container { max-width: 1100px; width: 100%; text-align: center; padding-top: 20px; padding-bottom: 20px; }
+        /* --- LANDING PAGE (MODIFIÉ POUR DESCENDRE LE LOGO) --- */
+        #landing { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            /* On enlève le centrage automatique vertical */
+            justify-content: flex-start; 
+            /* On force une grosse marge en haut pour éviter la barre de recherche */
+            padding-top: 15px; 
+            background: linear-gradient(160deg, var(--brand-primary) 0%, #002050 100%); 
+            color: white; 
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-bottom: 20px;
+            overflow-y: auto; 
+        }
         
-        /* --- LOGO STYLES (Ajusté : Taille réduite et marges de sécurité) --- */
+        .landing-container { max-width: 1100px; width: 100%; text-align: center; padding-bottom: 20px; }
+        
+        /* --- LOGO STYLES --- */
         .brand-logo { 
-            width: 140px;  /* Réduit de 160 à 140px */
-            height: 160px; /* Réduit de 180 à 160px */
+            width: 140px; 
+            height: 160px; 
             background: transparent; 
             border: none; 
             backdrop-filter: none; 
@@ -50,14 +65,12 @@
             align-items: center; 
             justify-content: center; 
             margin-bottom: 20px; 
-            padding: 5px; /* Petit padding de sécurité */
+            padding: 5px; 
         }
         
-        /* Effet de survol sur le SVG */
         .brand-logo svg {
             filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.3));
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            /* S'assure que le SVG ne déborde pas */
             overflow: visible; 
         }
         .brand-logo:hover svg {
@@ -67,7 +80,6 @@
         h1.portal-title { font-family: var(--font-head); font-size: 3rem; margin: 0; letter-spacing: -1px; font-weight: 800; text-transform: uppercase; }
         p.portal-subtitle { font-size: 1.2rem; opacity: 0.9; margin-top: 5px; font-weight: 400; max-width: 800px; margin-left: auto; margin-right: auto; }
         
-        /* Contexte du devoir */
         .project-context {
             max-width: 800px; margin: 30px auto 40px; font-size: 0.95rem; line-height: 1.6; 
             background: rgba(255,255,255,0.1); padding: 20px 30px; border-radius: 8px;
@@ -97,10 +109,8 @@
         
         .sb-scroll { flex: 1; overflow-y: auto; padding: 25px; position: relative; }
 
-        /* Phrase d'intro Sidebar */
         .sidebar-intro { font-size: 0.85rem; color: var(--text-gray); margin-bottom: 20px; line-height: 1.4; font-style: italic; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
 
-        /* KPI & TOOLTIP */
         .kpi-row { display: flex; gap: 15px; margin-bottom: 25px; position: relative; z-index: 5; }
         .kpi-box { flex: 1; border-left: 4px solid var(--brand-accent); padding-left: 15px; }
         .kpi-val { display: block; font-family: var(--font-head); font-weight: 700; font-size: 2rem; color: var(--text-dark); line-height: 1; }
@@ -119,12 +129,10 @@
         .tooltip-box ul { padding-left: 20px; margin: 5px 0; }
         .tooltip-box::after { content: ""; position: absolute; bottom: 100%; right: 54px; border-width: 7px; border-style: solid; border-color: transparent transparent #002050 transparent; }
 
-        /* SELECTEUR */
         .select-commune { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: #f8f9fa; color: var(--text-dark); font-family: var(--font-body); font-size: 0.85rem; font-weight: 500; cursor: pointer; outline: none; }
         .select-commune:focus { border-color: var(--brand-primary); }
         .select-loader { font-size: 0.8rem; color: var(--brand-primary); margin-top: 10px; font-weight:600; display: none; align-items:center; gap:8px; }
 
-        /* FILTRES */
         .filter-section { margin-bottom: 25px; padding: 15px; background: white; border: 1px solid var(--border); border-radius: 8px; }
         .filter-header { font-size: 0.75rem; font-weight: 700; color: var(--brand-primary); margin-bottom: 10px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
         .tags-group { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -132,7 +140,6 @@
         .tag:hover { opacity: 0.8; }
         .tag.active { color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border-color: transparent; }
 
-        /* VIZ & ACCORDIONS */
         .viz-block { background: white; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 20px; } 
         .viz-header { background: #f8f9fa; padding: 10px 15px; font-weight: 600; font-size: 0.85rem; color: var(--brand-primary); border-bottom: 1px solid var(--border); }
         .viz-body { padding: 15px; }
@@ -146,7 +153,6 @@
         details.info-box .info-content { padding: 15px; background: white; border: 1px solid var(--border); border-top: none; font-size: 0.8rem; color: var(--text-dark); line-height: 1.6; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; text-align: justify; }
         details.info-box .info-content strong { color: var(--brand-primary); font-weight: 700; }
 
-        /* CONTROLS MAP */
         .layer-control { margin-top:auto; display:flex; flex-direction:column; gap:8px; }
         .layer-btn { padding:12px 15px; background:#e1dfdd; border-radius:4px; cursor:pointer; font-weight:600; font-size:0.85rem; display:flex; align-items:center; gap:10px; color:#201f1e; transition: background 0.2s; border: 1px solid transparent; }
         .layer-btn:hover { background: #d0d0d0; }
@@ -174,7 +180,6 @@
                             <stop offset="0%" style="stop-color:#2a5a8a;stop-opacity:1" />
                             <stop offset="100%" style="stop-color:#0f2e50;stop-opacity:1" />
                         </radialGradient>
-                        
                         <linearGradient id="treeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                             <stop offset="0%" style="stop-color:#9fe64e;stop-opacity:1" />
                             <stop offset="100%" style="stop-color:#6dbf26;stop-opacity:1" />
@@ -191,11 +196,14 @@
 
                     <g transform="translate(0, 5)">
                         <path d="M46 65 L54 65 L56 95 L44 95 Z" fill="#6d4c41"/>
-                        
-                        <circle cx="50" cy="35" r="16" fill="url(#treeGrad)"/> <circle cx="36" cy="50" r="14" fill="url(#treeGrad)"/> <circle cx="64" cy="50" r="14" fill="url(#treeGrad)"/> <circle cx="45" cy="55" r="14" fill="url(#treeGrad)"/> <circle cx="55" cy="55" r="14" fill="url(#treeGrad)"/> <path d="M50 55 L50 68 M50 65 L40 55 M50 65 L60 55" stroke="#52821e" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+                        <circle cx="50" cy="35" r="16" fill="url(#treeGrad)"/> 
+                        <circle cx="36" cy="50" r="14" fill="url(#treeGrad)"/> 
+                        <circle cx="64" cy="50" r="14" fill="url(#treeGrad)"/> 
+                        <circle cx="45" cy="55" r="14" fill="url(#treeGrad)"/> 
+                        <circle cx="55" cy="55" r="14" fill="url(#treeGrad)"/> 
+                        <path d="M50 55 L50 68 M50 65 L40 55 M50 65 L60 55" stroke="#52821e" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
                     </g>
-                    
-                    </svg>
+                </svg>
             </div>
 
             <h1 class="portal-title">OBSERVATOIRE DES ENJEUX FORESTIERS</h1>
