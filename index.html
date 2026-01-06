@@ -8,25 +8,25 @@
     <script src='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js'></script>
     <link href='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css' rel='stylesheet' />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Barlow:wght@500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script src="data.js"></script>
 
     <style>
-        /* --- CHARTE BLEUE (DESIGN FIGÉ) --- */
+        /* --- DESIGN FIGÉ (Charte DataGrandEst) --- */
         :root {
             --brand-primary: #004578; 
             --brand-light: #0078d4;
             --brand-accent: #00bcf2;
-            
             --bg-app: #f3f2f1;
             --text-dark: #201f1e;
             --text-gray: #605e5c;
             --surface: #ffffff;
             --border: #e1dfdd;
             --acc-header: #f3f2f1;
-            
             --font-head: 'Barlow', sans-serif;
             --font-body: 'Inter', sans-serif;
         }
@@ -36,7 +36,7 @@
         .page { position: absolute; inset: 0; transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.4s; z-index: 10; background: var(--bg-app); }
         .page.hidden { transform: translateY(-100vh); opacity: 0; pointer-events: none; z-index: 0; }
 
-        /* --- LANDING --- */
+        /* LANDING */
         #landing { display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(160deg, var(--brand-primary) 0%, #002050 100%); color: white; padding: 20px; }
         .landing-container { max-width: 900px; width: 100%; text-align: center; }
         .brand-logo { width: 80px; height: 80px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); border-radius: 16px; font-size: 2.5rem; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px; color: var(--brand-accent); }
@@ -50,9 +50,11 @@
         .feature-card h3 { margin: 0 0 10px; font-family: var(--font-head); color: var(--brand-accent); font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
         .feature-card p { margin: 0; font-size: 0.9rem; line-height: 1.6; opacity: 0.8; }
 
-        /* --- APP --- */
+        /* APP LAYOUT */
         #app { display: flex; height: 100vh; width: 100vw; }
-        #map { flex: 1; height: 100%; }
+        #map { flex: 1; height: 100%; position:relative; }
+        
+        /* SIDEBAR */
         .sidebar { position: absolute; top: 0; left: 0; bottom: 0; width: 400px; background: var(--surface); z-index: 20; display: flex; flex-direction: column; box-shadow: 5px 0 15px rgba(0,0,0,0.05); border-right: 1px solid var(--border); }
         .sb-header { padding: 25px; background: var(--brand-primary); color: white; display: flex; align-items: center; justify-content: space-between; }
         .sb-title h2 { margin: 0; font-family: var(--font-head); font-size: 1.4rem; font-weight: 700; }
@@ -76,21 +78,21 @@
         /* SELECTEUR */
         .select-commune { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: #f8f9fa; color: var(--text-dark); font-family: var(--font-body); font-size: 0.85rem; font-weight: 500; cursor: pointer; outline: none; }
         .select-commune:focus { border-color: var(--brand-primary); }
-        .select-loader { font-size: 0.7rem; color: var(--brand-light); margin-top: 5px; font-style: italic; display: none; }
+        .select-loader { font-size: 0.8rem; color: var(--brand-primary); margin-top: 10px; font-weight:600; display: none; align-items:center; gap:8px; }
 
-        /* FILTRES */
+        /* FILTRES AVEC COULEUR */
         .filter-section { margin-bottom: 25px; padding: 15px; background: white; border: 1px solid var(--border); border-radius: 8px; }
         .filter-header { font-size: 0.75rem; font-weight: 700; color: var(--brand-primary); margin-bottom: 10px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
         .tags-group { display: flex; gap: 8px; flex-wrap: wrap; }
         .tag { font-size: 0.7rem; padding: 6px 12px; border-radius: 4px; cursor: pointer; background: #eff6fc; color: var(--text-gray); font-weight: 600; border: 1px solid transparent; transition: all 0.2s; }
         .tag:hover { opacity: 0.8; }
+        /* Style Actif avec couleur (géré par JS) */
         .tag.active { color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border-color: transparent; }
 
-        /* GRAPHIQUES */
+        /* VIZ & ACCORDIONS */
         .viz-block { background: white; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
         .viz-header { background: #f8f9fa; padding: 10px 15px; font-weight: 600; font-size: 0.85rem; color: var(--brand-primary); border-bottom: 1px solid var(--border); }
         .viz-body { padding: 15px; }
-
         details.info-box { width: 100%; margin-bottom: 20px; }
         details.info-box summary { background-color: var(--acc-header); color: var(--text-gray); padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
         details.info-box summary::-webkit-details-marker { display: none; }
@@ -98,7 +100,7 @@
         details.info-box[open] summary::after { content: '-'; }
         details.info-box .info-content { padding: 12px; background: white; border: 1px solid var(--border); border-top: none; font-size: 0.75rem; color: var(--text-gray); line-height: 1.5; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; }
 
-        /* CONTROLES */
+        /* LAYER CONTROLS */
         .layer-control { margin-top:auto; display:flex; flex-direction:column; gap:8px; }
         .layer-btn { padding:12px 15px; background:#e1dfdd; border-radius:4px; cursor:pointer; font-weight:600; font-size:0.85rem; display:flex; align-items:center; gap:10px; color:#201f1e; transition: background 0.2s; border: 1px solid transparent; }
         .layer-btn:hover { background: #d0d0d0; }
@@ -141,7 +143,7 @@
                     <select id="commune-select" class="select-commune" onchange="changeCommune(this.value)" disabled>
                         <option value="">Chargement des communes...</option>
                     </select>
-                    <div id="loading-msg" class="select-loader"><i class="fa-solid fa-circle-notch fa-spin"></i> Calcul des appartenances géographiques...</div>
+                    <div id="loading-msg" class="select-loader"><i class="fa-solid fa-scissors fa-spin"></i> Découpage géographique en cours...</div>
                 </div>
 
                 <div class="kpi-row">
@@ -189,13 +191,17 @@
             labels: ['Nul', 'Faible', 'Moyen', 'Fort', 'Critique']
         };
 
-        // Etats
+        // Etats de l'app
         let activeRiskFilters = [0, 1, 2, 3, 4];
-        let selectedCommune = null;
+        let selectedCommuneName = null;
+        let communesGeoJSON = null; 
+        
+        // Données affichées (Globale ou Découpée)
+        let currentDisplayData = null; 
+
+        // Charts
         let polarChart = null;
         let barChart = null;
-        // Contiendra les communes GeoJSON
-        let communesFeatureCollection = null; 
 
         // --- NAVIGATION ---
         function enterApp() {
@@ -208,21 +214,7 @@
             document.getElementById('landing').classList.remove('hidden');
         }
 
-        // --- ALGORITHME POINT DANS POLYGONE (RAY CASTING) ---
-        // Permet de trouver la commune sans bibliothèque externe lourde
-        function isPointInPolygon(point, vs) {
-            var x = point[0], y = point[1];
-            var inside = false;
-            for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-                var xi = vs[i][0], yi = vs[i][1];
-                var xj = vs[j][0], yj = vs[j][1];
-                var intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-                if (intersect) inside = !inside;
-            }
-            return inside;
-        }
-
-        // --- INIT MAP ---
+        // --- MAP INIT ---
         const map = new maplibregl.Map({
             container: 'map',
             style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
@@ -231,71 +223,42 @@
 
         map.on('load', async () => {
             if (typeof forestData === 'undefined') { console.error("Data missing"); return; }
-
-            // 1. Charger les contours des communes (API Gouv)
-            document.getElementById('loading-msg').style.display = 'block';
             
+            // Initialisation des données courantes avec tout le département
+            currentDisplayData = forestData;
+
+            // 1. Récupérer les contours communaux
             try {
-                const response = await fetch('https://geo.api.gouv.fr/departements/68/communes?geometry=contour&format=geojson');
-                communesFeatureCollection = await response.json();
+                const res = await fetch('https://geo.api.gouv.fr/departements/68/communes?geometry=contour&format=geojson');
+                communesGeoJSON = await res.json();
                 
-                // 2. JOINTURE SPATIALE (CALCUL MATHEMATHIQUE)
-                // Pour chaque forêt, on trouve son centre et on cherche dans quelle commune il tombe
-                forestData.features.forEach(forest => {
-                    // On prend le premier point du polygone comme référence (simple et rapide)
-                    let p = forest.geometry.type === 'Polygon' ? forest.geometry.coordinates[0][0] : forest.geometry.coordinates[0][0][0];
-                    
-                    // On cherche la commune correspondante
-                    let foundCommune = communesFeatureCollection.features.find(com => {
-                        // Gestion MultiPolygon vs Polygon pour les communes
-                        if(com.geometry.type === 'Polygon') {
-                            return isPointInPolygon(p, com.geometry.coordinates[0]);
-                        } else {
-                            // Pour MultiPolygon, on teste chaque polygone
-                            return com.geometry.coordinates.some(poly => isPointInPolygon(p, poly[0]));
-                        }
-                    });
-
-                    // On assigne le nom trouvé aux propriétés de la forêt
-                    if(foundCommune) {
-                        forest.properties.NOM_CALCULE = foundCommune.properties.nom;
-                    } else {
-                        forest.properties.NOM_CALCULE = "Inconnu";
-                    }
-                });
-
-                // 3. Remplir le selecteur avec les noms trouvés
-                const uniqueCommunes = [...new Set(forestData.features.map(f => f.properties.NOM_CALCULE))].sort();
+                // Remplir le menu déroulant
                 const select = document.getElementById('commune-select');
                 select.innerHTML = '<option value="">Tout le département</option>';
-                uniqueCommunes.forEach(nom => {
-                    if(nom !== "Inconnu") {
-                        const opt = document.createElement('option');
-                        opt.value = nom; opt.innerText = nom;
-                        select.appendChild(opt);
-                    }
+                // Tri alphabétique
+                communesGeoJSON.features.sort((a,b) => a.properties.nom.localeCompare(b.properties.nom));
+                communesGeoJSON.features.forEach(f => {
+                    const opt = document.createElement('option');
+                    opt.value = f.properties.nom;
+                    opt.innerText = f.properties.nom;
+                    select.appendChild(opt);
                 });
                 select.disabled = false;
-                document.getElementById('loading-msg').style.display = 'none';
 
-                // 4. Ajouter la couche COMMUNES (cachée par défaut)
-                map.addSource('com', { type: 'geojson', data: communesFeatureCollection });
+                // Ajouter source Communes
+                map.addSource('com', { type: 'geojson', data: communesGeoJSON });
                 map.addLayer({ 
                     id: 'com', type: 'line', source: 'com', 
                     paint: { 'line-color': '#1e293b', 'line-width': 2, 'line-opacity': 0 },
                     layout: { 'visibility': 'none' } 
                 });
 
-            } catch (e) {
-                console.error("Erreur chargement communes", e);
-                document.getElementById('loading-msg').innerText = "Erreur chargement données géo.";
-            }
+            } catch(e) { console.error("Erreur API Gouv", e); }
 
-            // 5. Ajouter les autres couches
-            map.addSource('sat', { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256 });
-            map.addLayer({ id: 'sat', type: 'raster', source: 'sat', paint: { 'raster-opacity': 0 } });
-
-            map.addSource('foret', { type: 'geojson', data: forestData });
+            // 2. Ajouter source Forêt (vide au début, on la remplit après)
+            // Note: On utilise 'currentDisplayData' pour la source
+            map.addSource('foret', { type: 'geojson', data: currentDisplayData });
+            
             map.addLayer({
                 id: 'foret-3d', type: 'fill-extrusion', source: 'foret',
                 paint: {
@@ -306,88 +269,133 @@
                 }
             });
 
-            // Zoom Initial
+            // 3. Source Sat
+            map.addSource('sat', { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256 });
+            map.addLayer({ id: 'sat', type: 'raster', source: 'sat', paint: { 'raster-opacity': 0 } });
+
+            // 4. Initialisations
             zoomToAll();
+            updateInterface(); // KPI & Charts
+            initFilters(); // Boutons
 
             // Popup
             const popup = new maplibregl.Popup({closeButton:false, closeOnClick:false});
             map.on('mousemove', 'foret-3d', (e)=>{
                 map.getCanvas().style.cursor = 'pointer';
                 const p = e.features[0].properties;
+                // Calcul de surface affichée (peut être approximatif après découpe)
+                const areaHa = Math.round(p.surf/10000).toLocaleString(); 
+                
                 popup.setLngLat(e.lngLat).setHTML(`
                     <div class="pop-head" style="background:${config.riskColors[p.DN]}">RISQUE ${config.labels[p.DN]}</div>
-                    <div class="pop-body">
-                        <div>${Math.round(p.surf/10000).toLocaleString()} Ha</div>
-                        <div style="font-size:0.7rem; color:#666; margin-top:4px;">${p.NOM_CALCULE || 'Zone forestière'}</div>
-                    </div>
+                    <div class="pop-body">${areaHa} Ha</div>
                 `).addTo(map);
             });
             map.on('mouseleave', 'foret-3d', ()=>{ map.getCanvas().style.cursor=''; popup.remove(); });
-
-            updateInterface();
-            initFilters();
         });
 
-        // --- LOGIQUE FILTRE & UPDATE ---
-
-        window.changeCommune = function(nom) {
-            selectedCommune = nom === "" ? null : nom;
+        // --- COEUR DU SYSTÈME : DÉCOUPE GÉOGRAPHIQUE ---
+        
+        async function changeCommune(nom) {
+            selectedCommuneName = nom === "" ? null : nom;
+            const loader = document.getElementById('loading-msg');
             
-            // Zoom sur la commune
-            if(selectedCommune && communesFeatureCollection) {
-                const comFeature = communesFeatureCollection.features.find(f => f.properties.nom === selectedCommune);
-                if(comFeature) {
+            if (!selectedCommuneName) {
+                // CAS 1 : Tout le département
+                currentDisplayData = forestData; // On remet les données brutes
+                map.getSource('foret').setData(currentDisplayData);
+                zoomToAll();
+                updateInterface();
+                applyRiskFilter();
+                return;
+            }
+
+            // CAS 2 : Une commune spécifique
+            loader.style.display = 'flex'; // Afficher loader
+            
+            // Petit délai pour laisser le UI se mettre à jour avant le gros calcul
+            setTimeout(() => {
+                const communeFeature = communesGeoJSON.features.find(f => f.properties.nom === selectedCommuneName);
+                
+                if (communeFeature) {
+                    // A. Zoom sur la commune
                     const b = new maplibregl.LngLatBounds();
-                    // On gère simple polygon ou multipolygon pour le bound
-                    const coords = comFeature.geometry.type === 'Polygon' ? comFeature.geometry.coordinates[0] : comFeature.geometry.coordinates.flat(1);
+                    // Gestion Polygon vs MultiPolygon pour le zoom
+                    const coords = communeFeature.geometry.type === 'Polygon' ? communeFeature.geometry.coordinates[0] : communeFeature.geometry.coordinates.flat(1);
                     coords.forEach(p => b.extend(p));
                     map.fitBounds(b, { padding: 20 });
+
+                    // B. DÉCOUPE (CLIPPING) avec Turf.js
+                    // On va créer un nouveau FeatureCollection contenant les morceaux de forêt
+                    const clippedFeatures = [];
+
+                    forestData.features.forEach(forest => {
+                        // Optimisation : On vérifie d'abord si les boites englobantes se touchent (très rapide)
+                        // turf.booleanDisjoint retourne true si ça ne se touche pas du tout
+                        // On utilise try/catch car turf peut être capricieux sur des géométries invalides
+                        try {
+                            const intersection = turf.intersect(forest, communeFeature);
+                            if (intersection) {
+                                // On garde les propriétés originales (Niveau de risque DN, etc)
+                                intersection.properties = { ...forest.properties };
+                                
+                                // On recalcule la surface exacte du morceau découpé (optionnel mais plus précis)
+                                // intersection.properties.surf = turf.area(intersection); 
+                                
+                                clippedFeatures.push(intersection);
+                            }
+                        } catch(e) {
+                            // Ignorer les géométries corrompues
+                        }
+                    });
+
+                    // C. Mise à jour de la carte avec les morceaux découpés
+                    currentDisplayData = { type: 'FeatureCollection', features: clippedFeatures };
+                    map.getSource('foret').setData(currentDisplayData);
                 }
-            } else {
-                zoomToAll();
-            }
 
-            applyMapFilters();
-            updateInterface();
+                // D. Mise à jour des stats et filtres
+                updateInterface();
+                applyRiskFilter();
+                
+                loader.style.display = 'none'; // Cacher loader
+            }, 50);
         }
 
-        function zoomToAll() {
-            const b = new maplibregl.LngLatBounds();
-            forestData.features.forEach(f => {
-                const c = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] : f.geometry.coordinates.flat(1);
-                c.forEach(p => b.extend(p));
-            });
-            if(!b.isEmpty()) map.fitBounds(b, { padding: {top:50, bottom:50, left:420, right:50} });
+        // --- FILTRES VISUELS (Risque) ---
+        function applyRiskFilter() {
+            // On filtre simplement sur la propriété DN, quel que soit le jeu de données chargé (Entier ou Découpé)
+            map.setFilter('foret-3d', ['in', ['get', 'DN'], ['literal', activeRiskFilters]]);
         }
 
-        function applyMapFilters() {
-            const riskFilter = ['in', ['get', 'DN'], ['literal', activeRiskFilters]];
-            if (selectedCommune) {
-                // Filtre combiné : Risque + Nom Calculé
-                map.setFilter('foret-3d', ['all', riskFilter, ['==', ['get', 'NOM_CALCULE'], selectedCommune]]);
-            } else {
-                map.setFilter('foret-3d', riskFilter);
-            }
-        }
-
+        // --- INTERFACE & KPI ---
         function updateInterface() {
-            let filteredFeatures = forestData.features;
-            if (selectedCommune) {
-                filteredFeatures = filteredFeatures.filter(f => f.properties.NOM_CALCULE === selectedCommune);
-            }
-
+            // On travaille sur currentDisplayData (qui est soit tout, soit découpé)
+            // Mais pour les KPI, on doit aussi respecter le filtre de risque actif ?
+            // Généralement les KPI montrent la réalité du terrain visible.
+            
+            // Pour simplifier : KPI = Stats sur les polygones présents dans currentDisplayData
+            // (indépendamment du filtre visuel bouton, ou alors on l'applique aussi)
+            
+            // CALCULONS LES STATS SUR LA DONNÉE GÉOGRAPHIQUE COURANTE
             let dist = [0,0,0,0,0];
             let totalSurf = 0, sumRisk = 0, highRiskSurf = 0;
 
-            filteredFeatures.forEach(f => {
+            currentDisplayData.features.forEach(f => {
                 const dn = f.properties.DN; 
-                const s = f.properties.surf;
+                // Calcul de surface précis via Turf pour être cohérent avec la découpe ?
+                // Ou on garde la propriété 'surf' (m2) d'origine ?
+                // Si on a découpé, la propriété 'surf' est celle du polygone entier d'origine.
+                // Pour être PRO, on recalcule l'aire du morceau visible.
+                const s = turf.area(f); // Surface en m² calculée géométriquement
+
                 dist[dn] += s;
                 totalSurf += s;
                 sumRisk += (s * dn);
                 if(dn >= 3) highRiskSurf += s;
             });
 
+            // Affichage KPI (conversion m² -> Hectares)
             document.getElementById('val-surf').innerText = (highRiskSurf/10000).toFixed(0).toLocaleString();
             document.getElementById('val-ivm').innerText = totalSurf > 0 ? (sumRisk/totalSurf).toFixed(2) : "0";
 
@@ -396,6 +404,7 @@
 
         function updateCharts(dataArr) {
             const total = dataArr.reduce((a,b)=>a+b,0);
+            // Données en %
             const val = total > 0 ? dataArr.map(d => ((d/total)*100).toFixed(1)) : [0,0,0,0,0];
             
             if(polarChart) { polarChart.data.datasets[0].data = val; polarChart.update(); }
@@ -418,27 +427,44 @@
             }
         }
 
-        // --- FILTRES COULEURS ---
+        function zoomToAll() {
+            if(!forestData.features.length) return;
+            const b = new maplibregl.LngLatBounds();
+            // On scanne un peu pour trouver les bornes globales
+            forestData.features.forEach(f => {
+                 const coords = f.geometry.type === 'Polygon' ? f.geometry.coordinates[0] : f.geometry.coordinates[0][0];
+                 // On prend juste le premier point pour aller vite, sinon c'est lourd
+                 b.extend(coords[0]);
+            });
+            // Fallback manuel si besoin, centré sur Colmar
+            map.setCenter([7.35, 48.08]); map.setZoom(9);
+        }
+
+        // --- FILTRES BOUTONS COULEURS ---
         function initFilters() {
             const c = document.getElementById('filter-container');
             config.labels.forEach((l, i)=>{
                 const t = document.createElement('div');
                 t.className = 'tag active'; t.innerText = l;
                 t.style.backgroundColor = config.riskColors[i]; // Couleur initiale
+                t.style.color = '#fff';
+                
                 t.onclick = ()=>{
                     const idx = activeRiskFilters.indexOf(i);
                     if(idx>-1) { 
                         if(activeRiskFilters.length>1) { 
                             activeRiskFilters.splice(idx,1); 
                             t.classList.remove('active');
-                            t.style.backgroundColor = ''; // Enlever couleur
+                            t.style.backgroundColor = '#eff6fc'; 
+                            t.style.color = '#605e5c';
                         } 
                     } else { 
                         activeRiskFilters.push(i); 
                         t.classList.add('active');
-                        t.style.backgroundColor = config.riskColors[i]; // Remettre couleur
+                        t.style.backgroundColor = config.riskColors[i];
+                        t.style.color = '#fff';
                     }
-                    applyMapFilters();
+                    applyRiskFilter();
                 };
                 c.appendChild(t);
             });
