@@ -1,12 +1,15 @@
 **Observatoire des Enjeux Forestiers (68)**
+
 Contexte du projet : Ce prototype a été réalisé dans le cadre d'un exercice de mise en situation pour le recrutement d'un chargé de mission "Enjeux Forestiers". L'objectif est de démontrer une capacité à valoriser une donnée brute (Open Data) via une interface cartographique interactive d'aide à la décision.
 
 **Vue d'ensemble**
+
 L'Observatoire des Enjeux Forestiers est une plateforme de géovisualisation (WebSIG) conçue pour analyser la vulnérabilité du couvert végétal face au risque incendie dans le département du Haut-Rhin.
 
 En croisant les données de sensibilité écologique avec le découpage administratif, cet outil offre aux décideurs publics (Maires, EPCI, Préfecture) et aux services de lutte (SDIS) une lecture immédiate des zones critiques pour adapter les politiques de prévention.
 
 **Objectifs**
+
 Valorisation de la Donnée Publique : Transformer un jeu de données complexe (niveau de sensibilité DN) en une information visuelle intelligible.
 
 Aide à la Décision (Urbanisme) : Identifier les communes où la pression du risque nécessite une adaptation des documents d'urbanisme (PLU) et un renforcement des Obligations Légales de Débroussaillement (OLD).
@@ -14,6 +17,7 @@ Aide à la Décision (Urbanisme) : Identifier les communes où la pression du ri
 Pédagogie du Risque : Fournir des supports visuels (Radar, 3D) pour développer la culture du risque auprès des élus et des citoyens.
 
 **Caractéristiques Techniques**
+
 **1. Visualisation 3D Inversée (Smart Mapping)**
 Pour maximiser la lisibilité des zones à risque, l'application utilise une projection 3D inversée :
 
@@ -36,6 +40,7 @@ Profil Radar : "Signature" du risque de la commune (permet de voir si la vulnér
 Répartition Surfacique : Histogramme des volumes d'hectares par classe de risque.
 
 **Données et Méthodologie**
+
 Les données utilisées sont issues de sources ouvertes officielles et traitées pour garantir leur intégrité :
 
 Sensibilité aux feux de forêt (DataGrandEst) :
@@ -53,6 +58,7 @@ Indice IVM (Indice de Vulnérabilité Moyen) :
 Indicateur synthétique calculé par l'application : moyenne pondérée des niveaux de risque par rapport à la surface visible.
 
 **Stack Technique**
+
 Le projet est conçu comme une Single Page Application (SPA) légère, sans backend lourd, pour une portabilité maximale :
 
 Cartographie : MapLibre GL JS
