@@ -1,13 +1,16 @@
+
 **Observatoire des Enjeux Forestiers (68)**
 
 Contexte du projet : Ce prototype a été réalisé dans le cadre d'un exercice de mise en situation pour le recrutement d'un chargé de mission "Enjeux Forestiers". L'objectif est de démontrer une capacité à valoriser une donnée brute (Open Data) via une interface cartographique interactive d'aide à la décision.
+
+______
 
 **Vue d'ensemble**
 
 L'Observatoire des Enjeux Forestiers est une plateforme de géovisualisation (WebSIG) conçue pour analyser la vulnérabilité du couvert végétal face au risque incendie dans le département du Haut-Rhin.
 
 En croisant les données de sensibilité écologique avec le découpage administratif, cet outil offre aux décideurs publics (Maires, EPCI, Préfecture) et aux services de lutte (SDIS) une lecture immédiate des zones critiques pour adapter les politiques de prévention.
-
+______
 **Objectifs**
 
 Valorisation de la Donnée Publique : Transformer un jeu de données complexe (niveau de sensibilité DN) en une information visuelle intelligible.
@@ -15,7 +18,7 @@ Valorisation de la Donnée Publique : Transformer un jeu de données complexe (n
 Aide à la Décision (Urbanisme) : Identifier les communes où la pression du risque nécessite une adaptation des documents d'urbanisme (PLU) et un renforcement des Obligations Légales de Débroussaillement (OLD).
 
 Pédagogie du Risque : Fournir des supports visuels (Radar, 3D) pour développer la culture du risque auprès des élus et des citoyens.
-
+_______
 **Caractéristiques Techniques**
 
 **1. Visualisation 3D Inversée (Smart Mapping)**
@@ -38,7 +41,7 @@ Chaque sélection territoriale génère des graphiques d'analyse (via Chart.js) 
 Profil Radar : "Signature" du risque de la commune (permet de voir si la vulnérabilité est structurelle).
 
 Répartition Surfacique : Histogramme des volumes d'hectares par classe de risque.
-
+______
 **Données et Méthodologie**
 
 Les données utilisées sont issues de sources ouvertes officielles et traitées pour garantir leur intégrité :
@@ -56,7 +59,7 @@ Récupération dynamique des contours communaux du Haut-Rhin (Code 68).
 Indice IVM (Indice de Vulnérabilité Moyen) :
 
 Indicateur synthétique calculé par l'application : moyenne pondérée des niveaux de risque par rapport à la surface visible.
-
+________
 **Stack Technique**
 
 Le projet est conçu comme une Single Page Application (SPA) légère, sans backend lourd, pour une portabilité maximale :
@@ -68,5 +71,5 @@ Analyse Spatiale : Turf.js
 Dataviz : Chart.js
 
 Interface : HTML5 / CSS3 (Design System inspiré de la charte DataGrandEst).
-
-Réalisé en Janvier 2026 MERCIER Solane - Exercice de recrutement.
+________
+_Réalisé en Janvier 2026 MERCIER Solane - Exercice de recrutement._
